@@ -65,6 +65,14 @@ def amazon_sorter(status:str,summary_dict: dict,page_text,page_tables, page_num:
                     product_name_match = re.search(amazon_name,products_rows[-1][1])
                     product_name = product_name_match.group(1)
                     product_qty = products_rows[-1][3]
+                    
+                    sorting_key = f"{product_name} - {product_qty} qty"
+                    
+                    if sorting_key not in summary_dict.keys():
+                        summary_dict[sorting_key] = []
+                    
+                    summary_dict[sorting_key] += [page_num-1, page_num]
+                        
                     status += "Single item order." 
                     print(product_name)
         else:
