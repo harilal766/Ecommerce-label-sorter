@@ -1,8 +1,6 @@
 from PyPDF2 import PdfReader
-import pdfplumber
+import pdfplumber, json, re
 import pandas as pd
-import json, re
-
 from regex_patterns import amazon_order_id_pattern
 
 
@@ -26,14 +24,10 @@ def main():
             for page_index, page in enumerate(pdf_file.pages):
                 page_text = page.extract_text(); page_tables = page.extract_tables()
                 
-                page_status = f"Page {page_index+1} : "
+                page_status = f"{page_index+1} : "
                 
                 sorting = {
-                    "amazon" : amazon_sorter(
-                        status=page_status, summary_dict = summary_dict,
-                        page_text = page_text, page_tables=page_tables, 
-                        page_num = page_index + 1
-                    ),
+                    "amazon" : amazon_sorter(page_status,summary_dict,page_text, page_tables, page_index+1),
                 }
                 
                 platform = platform.strip().lower()
@@ -47,9 +41,6 @@ def main():
     else:
         print(summary_dict)
         return summary_dict
-        
-        
-        
         
 def amazon_sorter(status:str,summary_dict: dict,page_text,page_tables, page_num:int):
     try:
@@ -69,21 +60,28 @@ def amazon_sorter(status:str,summary_dict: dict,page_text,page_tables, page_num:
                     status += f"Mixed orders, count : {item_count}."
                     summary_dict["Mixed"] += [page_num-1, page_num]
                     
-                else:      
-                    product_name_match = re.search(r'(\(\s[A-Z0-9-]+\s\))',products_rows[-1][1])
-                    product_name = product_name_match
+                else:
+                    amazon_name = r'([a-zA-Z0-9|\n\s]+)\s\|\s|\n([A-Z0-9]+\s\(\s[A-Z0-9-]+\s\))'    
+                    product_name_match = re.search(amazon_name,products_rows[-1][1])
+                    product_name = product_name_match.group(1)
                     product_qty = products_rows[-1][3]
                     status += "Single item order." 
-                    print(product_name_match, product_qty)
+                    print(product_name)
         else:
             if re.findall(r'^Tax Invoice/Bill of Supply/Cash Memo',page_text):
                 status += "Overlapping page."
             else:
                 status += "Qr code page."
                         
-            print(status, end = "," if "Qr code page." in status else None)
+            #print(status, end = "," if "Qr code page." in status else None)
     except Exception as e:
         print(e)     
+
+def create_pdf(output_directory:str):
+    try:
+        pass
+    except Exception as e:
+        pass
 
 if __name__ == "__main__":
     main()
