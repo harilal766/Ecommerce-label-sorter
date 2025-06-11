@@ -1,7 +1,9 @@
 from PyPDF2 import PdfReader
 import pdfplumber
 import pandas as pd
-import json
+import json, re
+
+from regex_patterns import amazon_order_id_pattern
 
 
 
@@ -17,48 +19,44 @@ def main():
         platform = "Amazon "
         summary = 0
         
-        str = {
-            "vertical_strategy": "lines", 
-            "horizontal_strategy": "lines",
-            "explicit_vertical_lines": [],
-            "explicit_horizontal_lines": [],
-            "snap_tolerance": 3,
-            "snap_x_tolerance": 3,
-            "snap_y_tolerance": 3,
-            "join_tolerance": 3,
-            "join_x_tolerance": 3,
-            "join_y_tolerance": 3,
-            "edge_min_length": 3,
-            "min_words_vertical": 3,
-            "min_words_horizontal": 1,
-            "intersection_tolerance": 3,
-            "intersection_x_tolerance": 3,
-            "intersection_y_tolerance": 3,
-            "text_tolerance": 3,
-            "text_x_tolerance": 3,
-            "text_y_tolerance": 3,
-            #"text_*": …, # See below
-        }
-        
         with pdfplumber.open(input_dir) as pdf_file:
-            for page in pdf_file.pages:
-                page_text = page.extract_text()
-                page_table = page.extract_tables()
+            for page_num, page in enumerate(pdf_file.pages):
+                
+                page_text = page.extract_text(); page_tables = page.extract_tables()
                 
                 if platform.strip().lower() == 'amazon':
-                    processed_invoice_data = []
-                    if len(page_table) > 1:
-                        processed_headers = [column.replace("\n", " ") for column in page_table[0][0]]
-                        print(processed_headers)
-                        print("+++")
-
+                    
+                    # start of amazon function in the future
+                    order_id_match = re.findall(amazon_order_id_pattern,page_text)
+                    # Ensuring invoice pages
+                    
+                    page_status = f"{page_num}. "
+                    if order_id_match:
+                        if len(page_tables) > 1:
+                            page_status += "Invoice page, "
+                            # Products table
+                            products_table = page_tables[0]
+                            products_rows = products_table[:-3]
+                                
+                            item_count = len(products_rows)-1
+                            if len(products_rows) > 2:
+                                page_status += f"Mixed orders, count : {item_count}."
+                            else:
+                                page_status += f"Single item order."
+                                
+                    else:
+                        page_status += "Qr code page."
+                        
+                    print(page_status)
+                                    
                     
     except Exception as e:
         print(e)
     else:
         return summary
         
-
+def amazon_sorter():
+    pass
 
 if __name__ == "__main__":
     main()
