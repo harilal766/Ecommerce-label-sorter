@@ -38,15 +38,15 @@ def main():
                 
                 platform = platform.strip().lower()
                 if platform in sorting.keys():
-                    summary = sorting[platform]
+                    sorting[platform]
                 else:
                     print("Unsupported platform")
                     
     except Exception as e:
-        print(f"00 {e}")
+        print(e)
     else:
-        print(summary)
-        return summary
+        print(summary_dict)
+        return summary_dict
         
         
         
@@ -73,7 +73,7 @@ def amazon_sorter(status:str,summary_dict: dict,page_text,page_tables, page_num:
                     product_name_match = re.search(r'(\(\s[A-Z0-9-]+\s\))',products_rows[-1][1])
                     product_name = product_name_match
                     product_qty = products_rows[-1][3]
-                    page_status += "Single item order." 
+                    status += "Single item order." 
                     print(product_name_match, product_qty)
         else:
             if re.findall(r'^Tax Invoice/Bill of Supply/Cash Memo',page_text):
@@ -84,10 +84,6 @@ def amazon_sorter(status:str,summary_dict: dict,page_text,page_tables, page_num:
             print(status, end = "," if "Qr code page." in status else None)
     except Exception as e:
         print(e)     
-        
-        
-        
-                        
 
 if __name__ == "__main__":
     main()
