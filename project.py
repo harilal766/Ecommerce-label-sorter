@@ -20,7 +20,7 @@ def main():
         summary = 0
         
         with pdfplumber.open(input_dir) as pdf_file:
-            for page_num, page in enumerate(pdf_file.pages):
+            for page_index, page in enumerate(pdf_file.pages):
                 
                 page_text = page.extract_text(); page_tables = page.extract_tables()
                 
@@ -30,7 +30,7 @@ def main():
                     order_id_match = re.findall(amazon_order_id_pattern,page_text)
                     # Ensuring invoice pages
                     
-                    page_status = f"{page_num}. "
+                    page_status = f"Page {page_index+1}. "
                     if order_id_match:
                         if len(page_tables) > 1:
                             page_status += "Invoice page, "
@@ -42,12 +42,14 @@ def main():
                             if len(products_rows) > 2:
                                 page_status += f"Mixed orders, count : {item_count}."
                             else:
-                                page_status += f"Single item order."
-                                
+                                page_status += "Single item order."       
                     else:
-                        page_status += "Qr code page."
+                        if re.findall(r'^Tax Invoice/Bill of Supply/Cash Memo',page_text):
+                            page_status += "Overlapping page."
+                        else:
+                            page_status += "Qr code page."
                         
-                    print(page_status)
+                    print(page_status, end = ", " if "Qr code page." in page_status else None)
                                     
                     
     except Exception as e:
