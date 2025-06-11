@@ -6,11 +6,12 @@ import json, re
 from regex_patterns import amazon_order_id_pattern
 
 
-
 def main():
     """
     read a pdf file and detect the shipment type eg : amazon, shopify etc
     """
+    
+    summary_dict = {}
     try:
         with open('creds.json') as json_file:
             json_dict = json.load(json_file)
@@ -24,13 +25,12 @@ def main():
                 
                 page_text = page.extract_text(); page_tables = page.extract_tables()
                 
+                page_status = f"Page {page_index+1}. "
+                
                 if platform.strip().lower() == 'amazon':
-                    
                     # start of amazon function in the future
                     order_id_match = re.findall(amazon_order_id_pattern,page_text)
                     # Ensuring invoice pages
-                    
-                    page_status = f"Page {page_index+1}. "
                     if order_id_match:
                         if len(page_tables) > 1:
                             page_status += "Invoice page, "
@@ -39,17 +39,24 @@ def main():
                             products_rows = products_table[:-3]
                                 
                             item_count = len(products_rows)-1
+                            
                             if len(products_rows) > 2:
                                 page_status += f"Mixed orders, count : {item_count}."
                             else:
-                                page_status += "Single item order."       
+                                
+                                product_name = products_rows[-1][1]; 
+                                product_qty = products_rows[-1][3]
+                                page_status += "Single item order." 
+                                
+                                print(product_name, product_qty)
+                                
                     else:
                         if re.findall(r'^Tax Invoice/Bill of Supply/Cash Memo',page_text):
                             page_status += "Overlapping page."
                         else:
                             page_status += "Qr code page."
                         
-                    print(page_status, end = ", " if "Qr code page." in page_status else None)
+                    #print(page_status, end = "," if "Qr code page." in page_status else None)
                                     
                     
     except Exception as e:
