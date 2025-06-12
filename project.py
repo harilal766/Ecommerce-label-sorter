@@ -1,7 +1,11 @@
 from PyPDF2 import PdfReader, PdfWriter
-import pdfplumber, json, re, os, sys
+import pdfplumber, json, re, os, sys, logging
 import pandas as pd
 from regex_patterns import *
+
+
+logging.getLogger('pdfminer').setLevel(logging.ERROR)
+
 
 with open('creds.json') as json_file:
     json_dict = json.load(json_file)
@@ -12,9 +16,8 @@ def main():
     summary_dict = {}
     try:
         #input_dir = str(input("Enter the input pdf file directory : "))
-        #output_dir = str(input("Enter the output folder directory : "))
-        
         verify_directory(input_dir)
+        #output_dir = str(input("Enter the output folder directory : "))
         verify_directory(output_dir)
         
         platform = "Amazon "
@@ -72,7 +75,7 @@ def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_
                 status += "Single item order."
                 product_description = products_rows[-1][1] 
                 product_name_match = re.sub(
-                    amazon_name_regex,"",product_description,re.IGNORECASE
+                    amazon_name_regex,"",product_description, flags = re.IGNORECASE
                 )
                 product_qty = products_rows[-1][3]
                 sorting_key = f"{product_name_match.replace("\n"," ")} - {product_qty} qty"
