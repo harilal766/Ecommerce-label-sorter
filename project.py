@@ -111,12 +111,11 @@ def create_pdf(input_pdf_dir: str, page_nums: list, out_file:str, output_directo
             order_count = int(len(page_nums)/2)
             
             # Sanitizing out file name
-            out_file = re.sub(r'\|'," ",out_file)
+            out_file = re.sub(r'\|',",",out_file)
             print(out_file)
             
-            
             output_directory = os.path.join(
-                output_directory, f"{out_file} - {order_count} Order{"s" if order_count > 1 else ""}.pdf"
+                output_directory, f"{out_file.replace("/"," ")} - {order_count} Order{"s" if order_count > 1 else ""}.pdf"
             )
             
             #print(output_directory)
