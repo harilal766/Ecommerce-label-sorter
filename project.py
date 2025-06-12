@@ -96,8 +96,6 @@ def create_shipment_summary(sorting_key:str, summary_dict, page_nums:list):
         summary_dict[sorting_key] += page_nums
     except Exception as e:
         print(e)
-    else:
-        pass
 
 def create_pdf(input_pdf_dir: str, page_nums: list, out_file:str, output_directory:str):
     try:
@@ -111,9 +109,17 @@ def create_pdf(input_pdf_dir: str, page_nums: list, out_file:str, output_directo
                 
                 
             order_count = int(len(page_nums)/2)
+            
+            # Sanitizing out file name
+            out_file = re.sub(r'\|'," ",out_file)
+            print(out_file)
+            
+            
             output_directory = os.path.join(
-                output_directory, f"{out_file.replace(" | "," ")} - {order_count} Order{"s" if order_count > 1 else ""}.pdf"
+                output_directory, f"{out_file} - {order_count} Order{"s" if order_count > 1 else ""}.pdf"
             )
+            
+            #print(output_directory)
             
             if output_directory:
                 with open(output_directory,"wb") as output_pdf:
