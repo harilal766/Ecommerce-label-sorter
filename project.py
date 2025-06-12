@@ -1,5 +1,5 @@
-from PyPDF2 import PdfReader
-import pdfplumber, json, re
+from PyPDF2 import PdfReader, PdfWriter
+import pdfplumber, json, re, os
 import pandas as pd
 from regex_patterns import *
 
@@ -9,26 +9,23 @@ with open('creds.json') as json_file:
     output_dir = json_dict["output"]
             
 def main():
-    """
-    read a pdf file and detect the shipment type eg : amazon, shopify etc
-    """
-    
     summary_dict = {}
     try:
         platform = "Amazon "
         summary = 0
-        
         with pdfplumber.open(input_dir) as pdf_file:
             for page_index, page in enumerate(pdf_file.pages):
                 page_text = page.extract_text(); page_tables = page.extract_tables()
                 
-                page_status = f"{page_index+1} : "
+                page_number = f"{page_index+1} : "
                 
                 sorting = {
-                    "amazon" : sort_amazon_label(page_status,summary_dict,page_text, page_tables, page_index+1),
+                    "amazon" : sort_amazon_label(page_number,summary_dict,page_text, page_tables, page_index+1),
                 }
                 
+                # Sanitizing platform input
                 platform = platform.strip().lower()
+                # selecting sorting function based on the selection
                 if platform in sorting.keys():
                     sorting[platform]
                 else:
@@ -39,6 +36,13 @@ def main():
     except Exception as e:
         print(e)
     else:
+        # verify the summary dict is populated
+        for key,value in summary_dict.items():
+            create_pdf(
+                input_pdf_dir = input_dir, page_nums = value, 
+                output_directory = output_dir, out_file = key
+            )
+            # store the sorted orders into their respective files in the target directory
         print(summary_dict)
         return summary_dict
         
@@ -91,14 +95,31 @@ def create_shipment_summary():
     else:
         pass
 
-def create_pdf(input_pdf_dir: str, page_nums: list, output_directory:str):
+def create_pdf(input_pdf_dir: str, page_nums: list, out_file:str, output_directory:str):
     try:
         # verify the pdf file exists
         # Verify the page contains something
-        
-        pass
+        if len(page_nums) > 0:
+            # Init
+            reader = PdfReader(input_pdf_dir); writer = PdfWriter()
+            for page in page_nums:
+                writer.add_page(reader.pages[page-1])
+                
+                
+            order_count = int(len(page_nums)/2)
+            output_directory = os.path.join(
+                output_directory, f"{out_file.replace(" | "," ")} - {order_count} Order{"s" if order_count > 1 else ""}.pdf"
+            )
+            
+            if output_directory:
+                with open(output_directory,"wb") as output_pdf:
+                    writer.write(output_pdf)
+        else:
+            print("Enter page nums")
+    except FileNotFoundError as e:
+        print("File location issues :\n", e)
     except Exception as e:
-        pass
+        print(e)
 
 def verify_directory():
     try:
