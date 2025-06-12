@@ -1,7 +1,7 @@
 from PyPDF2 import PdfReader
 import pdfplumber, json, re
 import pandas as pd
-from regex_patterns import amazon_order_id_pattern
+from regex_patterns import *
 
 
 def main():
@@ -34,6 +34,8 @@ def main():
                 else:
                     print("Unsupported platform")
                     
+    except AttributeError:
+        print("Attribute issues at the regex matching.")
     except Exception as e:
         print(e)
     else:
@@ -47,44 +49,42 @@ def amazon_sorter(status:str,summary_dict: dict,page_text,page_tables, page_num:
         # Ensuring invoice pages
         if order_id_match:
             status += "Invoice page, "
-            if len(page_tables) > 1:
-                # Products table
-                products_table = page_tables[0]
-                products_rows = products_table[:-3]
+            products_table = page_tables[0]
+            products_rows = products_table[:-3]
                                 
-                item_count = len(products_rows)-1
+            item_count = len(products_rows)-1
                             
-                if len(products_rows) > 2:
-                    if not "Mixed" in summary_dict.keys():
-                        summary_dict["Mixed"] = []
-                    status += f"Mixed orders, count : {item_count}."
-                    summary_dict["Mixed"] += [page_num-1, page_num]
+            if len(products_rows) > 2:
+                if not "Mixed" in summary_dict.keys():
+                    summary_dict["Mixed"] = []
+                status += f"Mixed orders, count : {item_count}."
+                summary_dict["Mixed"] += [page_num-1, page_num]
                     
-                else:
-                    r = '([A-Z0-9]+\s\(\s[A-Z0-9-]+\s\))'
-                    amazon_name = r'([\w\d\|?\n\s]+)\s\|\s|\n'
-                    product_description = products_rows[-1][1] 
-                    product_name_match = re.search(amazon_name,product_description)
-                    product_name = product_name_match.group(1)
-                    product_qty = products_rows[-1][3]
+            else:
+                product_description = products_rows[-1][1] 
+                product_name_match = re.sub(
+                    amazon_name_regex,"",product_description
+                )
+                product_qty = products_rows[-1][3]
                     
-                    sorting_key = f"{product_name} - {product_qty} qty"
+                sorting_key = f"{product_name_match.replace("\n"," ")} - {product_qty} qty"
                     
+                print(product_name_match)
                     
-                    if sorting_key not in summary_dict.keys():
-                        summary_dict[sorting_key] = []
+                if sorting_key not in summary_dict.keys():
+                    summary_dict[sorting_key] = []
                     
-                    summary_dict[sorting_key] += [page_num-1, page_num]
+                summary_dict[sorting_key] += [page_num-1, page_num]
                         
-                    status += "Single item order." 
-                    print(product_name)
+                status += "Single item order." 
+                
         else:
             if re.findall(r'^Tax Invoice/Bill of Supply/Cash Memo',page_text):
                 status += "Overlapping page."
             else:
                 status += "Qr code page"
                         
-        print(status, end = ", " if "Qr code page" in status else None)
+        #print(status, end = ", " if "Qr code page" in status else None)
     except Exception as e:
         print(e)     
 
