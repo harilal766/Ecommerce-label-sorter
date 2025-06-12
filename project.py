@@ -1,5 +1,5 @@
 from PyPDF2 import PdfReader, PdfWriter
-import pdfplumber, json, re, os
+import pdfplumber, json, re, os, sys
 import pandas as pd
 from regex_patterns import *
 
@@ -11,8 +11,13 @@ with open('creds.json') as json_file:
 def main():
     summary_dict = {}
     try:
+        #input_dir = str(input("Enter the input pdf file directory : "))
+        #output_dir = str(input("Enter the output folder directory : "))
+        
+        verify_directory(input_dir)
+        verify_directory(output_dir)
+        
         platform = "Amazon "
-        summary = 0
         with pdfplumber.open(input_dir) as pdf_file:
             for page_index, page in enumerate(pdf_file.pages):
                 page_text = page.extract_text(); page_tables = page.extract_tables()
@@ -107,36 +112,31 @@ def create_pdf(input_pdf_dir: str, page_nums: list, out_file:str, output_directo
             for page in page_nums:
                 writer.add_page(reader.pages[page-1])
                 
-                
             order_count = int(len(page_nums)/2)
-            
             # Sanitizing out file name
             out_file = re.sub(r'\|',",",out_file)
-            print(out_file)
+            #print(out_file)
             
             output_directory = os.path.join(
                 output_directory, f"{out_file.replace("/"," ")} - {order_count} Order{"s" if order_count > 1 else ""}.pdf"
             )
-            
             #print(output_directory)
-            
             if output_directory:
                 with open(output_directory,"wb") as output_pdf:
                     writer.write(output_pdf)
         else:
-            print("Enter page nums")
+            sys.exit("Enter page nums")
     except FileNotFoundError as e:
         print("File location issues :\n", e)
     except Exception as e:
         print(e)
 
-def verify_directory():
+def verify_directory(directory: str):
     try:
-        pass
-    except:
-        pass
-    else:
-        pass
+        if not os.path.exists(directory):
+            sys.exit(f"The directory : {directory} does not exist.")
+    except Exception as e:
+        print(e)
 
 if __name__ == "__main__":
     main()
