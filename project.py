@@ -43,7 +43,7 @@ def main():
                 output_directory = output_dir, out_file = key
             )
             # store the sorted orders into their respective files in the target directory
-        print(summary_dict)
+        #print(summary_dict)
         return summary_dict
         
 def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_num:int):
@@ -73,9 +73,11 @@ def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_
                 sorting_key = f"{product_name_match.replace("\n"," ")} - {product_qty} qty"
                     
             # populating summary dict based on the order condition
-            if sorting_key not in summary_dict.keys():
-                summary_dict[sorting_key] = []    
-            summary_dict[sorting_key] += [page_num-1, page_num]
+            create_shipment_summary(
+                sorting_key = sorting_key, 
+                summary_dict = summary_dict, page_nums = [page_num-1, page_num]
+            )
+
         # Handling QR code and Overlapping page
         else:
             if re.findall(r'^Tax Invoice/Bill of Supply/Cash Memo',page_text):
@@ -87,9 +89,11 @@ def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_
     except Exception as e:
         print(e)
 
-def create_shipment_summary():
+def create_shipment_summary(sorting_key:str, summary_dict, page_nums:list):
     try:
-        pass
+        if sorting_key not in summary_dict.keys():
+            summary_dict[sorting_key] = []    
+        summary_dict[sorting_key] += page_nums
     except Exception as e:
         print(e)
     else:
