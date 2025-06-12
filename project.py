@@ -3,9 +3,7 @@ import pdfplumber, json, re, os, sys, logging
 import pandas as pd
 from regex_patterns import *
 
-
 logging.getLogger('pdfminer').setLevel(logging.ERROR)
-
 
 with open('creds.json') as json_file:
     json_dict = json.load(json_file)
