@@ -42,10 +42,10 @@ def main():
         print(e)
     else:
         out = input_dir.replace(".pdf","")
-        os.makedirs(out)
         
-        print(out)
-        """
+        if not os.path.exists(out):
+            os.makedirs(out)
+        
         # verify the summary dict is populated
         for key,value in summary_dict.items():
             create_pdf(
@@ -55,7 +55,7 @@ def main():
             # store the sorted orders into their respective files in the target directory
         #print(summary_dict)
         return summary_dict
-        """
+        
         
 def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_num:int):
     sorting_key = None
