@@ -3,9 +3,7 @@ import pdfplumber, json, re, os, sys, logging
 import pandas as pd
 from regex_patterns import *
 
-
 logging.getLogger('pdfminer').setLevel(logging.ERROR)
-
 
 with open('creds.json') as json_file:
     json_dict = json.load(json_file)
@@ -14,7 +12,8 @@ with open('creds.json') as json_file:
 def main():
     summary_dict = {}
     try:
-        #input_dir = str(input("Enter the input pdf file directory : "))
+        input_dir = input("Enter the input pdf file directory : ")
+        input_dir = re.sub(r'"|\'',"",input_dir)
         verify_directory(input_dir)
         
         platform = "Amazon "
@@ -42,7 +41,6 @@ def main():
         print(e)
     else:
         out = input_dir.replace(".pdf","")
-        
         if not os.path.exists(out):
             os.makedirs(out)
         
@@ -55,8 +53,7 @@ def main():
             # store the sorted orders into their respective files in the target directory
         #print(summary_dict)
         return summary_dict
-        
-        
+
 def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_num:int):
     sorting_key = None
     try:
@@ -102,6 +99,7 @@ def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_
 
 def create_shipment_summary(sorting_key:str, summary_dict, page_nums:list):
     try:
+        # sorting key initialization
         if sorting_key not in summary_dict.keys():
             summary_dict[sorting_key] = []    
         summary_dict[sorting_key] += page_nums
