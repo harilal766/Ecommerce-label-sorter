@@ -10,15 +10,12 @@ logging.getLogger('pdfminer').setLevel(logging.ERROR)
 with open('creds.json') as json_file:
     json_dict = json.load(json_file)
     input_dir = json_dict["input"]
-    output_dir = json_dict["output"]
             
 def main():
     summary_dict = {}
     try:
         #input_dir = str(input("Enter the input pdf file directory : "))
         verify_directory(input_dir)
-        #output_dir = str(input("Enter the output folder directory : "))
-        verify_directory(output_dir)
         
         platform = "Amazon "
         with pdfplumber.open(input_dir) as pdf_file:
@@ -44,15 +41,21 @@ def main():
     except Exception as e:
         print(e)
     else:
+        out = input_dir.replace(".pdf","")
+        os.makedirs(out)
+        
+        print(out)
+        """
         # verify the summary dict is populated
         for key,value in summary_dict.items():
             create_pdf(
                 input_pdf_dir = input_dir, page_nums = value, 
-                output_directory = output_dir, out_file = key
+                output_directory = out, out_file = key
             )
             # store the sorted orders into their respective files in the target directory
         #print(summary_dict)
         return summary_dict
+        """
         
 def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_num:int):
     sorting_key = None
