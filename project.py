@@ -4,10 +4,6 @@ import pandas as pd
 from regex_patterns import *
 
 logging.getLogger('pdfminer').setLevel(logging.ERROR)
-
-with open('creds.json') as json_file:
-    json_dict = json.load(json_file)
-    input_dir = json_dict["input"]
             
 def main():
     summary_dict = {}
