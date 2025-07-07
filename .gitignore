@@ -2,9 +2,5 @@
 # Virtual Envs
 env/
 venv/
-
-
 __pycache__/
-
-
 creds.json
