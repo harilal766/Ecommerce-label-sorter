@@ -7,51 +7,56 @@ logging.getLogger('pdfminer').setLevel(logging.ERROR)
             
 def main():
     summary_dict = {}
-    try:
-        input_dir = input("Enter the input pdf file directory : ")
-        # Remove the quote characters from the input directory string
-        input_dir = re.sub(r'"|\'',"",input_dir)
-        # Make sure the file exists
-        verify_directory(input_dir)
-        
-        # Platform setting, need to be automated in the future
-        platform = "Amazon "
-        with pdfplumber.open(input_dir) as pdf_file:
-            for page_index, page in enumerate(pdf_file.pages):
-                page_text = page.extract_text(); page_tables = page.extract_tables()
-                
-                page_number = f"{page_index+1} : "
-                
-                # Assigning the sorting algorithm based on the platform
-                sorting_dict = {
-                    "amazon" : sort_amazon_label(page_number,summary_dict,page_text, page_tables, page_index+1),
-                }
-                # Sanitizing platform input
-                platform = platform.strip().lower()
-                # selecting sorting function based on the selection
-                if platform in sorting_dict.keys():
-                    sorting_dict[platform]
-                else:
-                    print("Unsupported platform")
-    except AttributeError:
-        print("Attribute issues at the regex matching.")
-    except Exception as e:
-        print(e)
-    else:
-        # Creating a folder in the name of the input file
-        out_folder = input_dir.replace(".pdf","")
-        if not os.path.exists(out_folder):
-            os.makedirs(out_folder)
-        
-        # verify the summary dict is populated
-        # store the sorted orders into their respective files in the target directory
-        for out_pdf_name, sorted_pages in summary_dict.items():
-            create_pdf(
-                input_pdf_dir = input_dir, page_nums = sorted_pages, 
-                output_directory = out_folder, out_file = out_pdf_name
-            )
-        #print(summary_dict)
-        return summary_dict
+    while True:
+        try:
+            input_dir = input("Enter the input pdf file directory : ")
+            # Remove the quote characters from the input directory string
+            input_dir = re.sub(r'"|\'',"",input_dir)
+            # Make sure the file exists
+            #verify_directory(input_dir)
+            
+            # Platform setting, need to be automated in the future
+            platform = "Amazon"
+            with pdfplumber.open(input_dir) as pdf_file:
+                for page_index, page in enumerate(pdf_file.pages):
+                    page_text = page.extract_text(); page_tables = page.extract_tables()
+                    
+                    page_number = f"{page_index+1} : "
+                    
+                    # Assigning the sorting algorithm based on the platform
+                    sorting_dict = {
+                        "amazon" : sort_amazon_label(page_number,summary_dict,page_text, page_tables, page_index+1),
+                    }
+                    # Sanitizing platform input
+                    platform = platform.strip().lower()
+                    # selecting sorting function based on the selection
+                    if platform in sorting_dict.keys():
+                        sorting_dict[platform]
+                    else:
+                        print("Unsupported platform")
+                        break
+        except AttributeError:
+            print("Attribute issues at the regex matching.")
+        except FileNotFoundError:
+            print(f"{input_dir} does not exist, Try again..")
+        except Exception as e:
+            print(e)
+        else:
+            # Creating a folder in the name of the input file
+            out_folder = input_dir.replace(".pdf","")
+            if not os.path.exists(out_folder):
+                os.makedirs(out_folder)
+            
+            # verify the summary dict is populated
+            # store the sorted orders into their respective files in the target directory
+            for out_pdf_name, sorted_pages in summary_dict.items():
+                create_pdf(
+                    input_pdf_dir = input_dir, page_nums = sorted_pages, 
+                    output_directory = out_folder, out_file = out_pdf_name
+                )
+            
+            print(summary_dict)
+            return summary_dict
 
 def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_num:int):
     sorting_key = None
@@ -84,7 +89,6 @@ def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_
                 sorting_key = sorting_key, 
                 summary_dict = summary_dict, page_nums = [page_num-1, page_num]
             )
-
         # Handling QR code and Overlapping page
         else:
             if re.findall(r'^Tax Invoice/Bill of Supply/Cash Memo',page_text):
