@@ -59,13 +59,12 @@ def main():
                         output_directory = out_folder, out_file = sorted_prodname
                     )
                 else:
-                    for sorted_qty in keys.keys():
+                    for sorted_qty,sorted_pages in keys.items():
                         create_pdf(
-                            input_pdf_dir = input_dir, sorted_page_nums = keys, 
+                            input_pdf_dir = input_dir, sorted_page_nums = sorted_pages, 
                             output_directory = out_folder, out_file = f"{sorted_prodname} - {sorted_qty}"
                         )
-                        
-            return summary_dict
+            return summary_dict 
 
 def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_num:int):
     sorting_key = None
@@ -139,29 +138,38 @@ def create_shipment_summary(
         print(e)
 
 def create_pdf(input_pdf_dir: str, sorted_page_nums: list, out_file:str, output_directory:str):
-    reader = PdfReader(input_pdf_dir); writer = PdfWriter()
-    out_file = re.sub(r'\|',",",out_file)
-    
-    order_count = int(len(sorted_page_nums)/2)
-    output_directory = os.path.join(
-        output_directory, f"{out_file.replace("/"," ")} - {order_count} Order{"s" if order_count > 1 else ""}.pdf"
-    )
-    for page in sorted_page_nums:
-        try:
-            # verify the pdf file exists
-            # Verify the page contains something
-            if len(sorted_page_nums) > 0:
-                # Init
-                writer.add_page(reader.pages[int(page)-1])
-                
-                if output_directory:
-                    with open(output_directory,"wb") as output_pdf:
-                        writer.write(output_pdf)
-            else:
-                sys.exit("Enter page nums")
-        except FileNotFoundError as e:
-            print("File location issues :\n", e)
-
+    try:
+        # verify the pdf file exists
+        # Verify the page contains something
+        if len(sorted_page_nums) > 0:
+            # Init
+            reader = PdfReader(input_pdf_dir); writer = PdfWriter()
+            
+            for page in sorted_page_nums:
+                writer.add_page(reader.pages[page-1])
+            
+            order_count = int(len(sorted_page_nums)/2)
+            # Sanitizing out file name
+            out_file = re.sub(r'\|',",",out_file)
+            #print(out_file)
+            
+            output_directory = os.path.join(
+                output_directory, f"{out_file.replace("/"," ")} - {order_count} Order{"s" if order_count > 1 else ""}.pdf"
+            )
+            #print(output_directory)
+            if output_directory:
+                with open(output_directory,"wb") as output_pdf:
+                    writer.write(output_pdf)
+            
+            
+        else:
+            sys.exit("Enter page nums")
+    except FileNotFoundError as e:
+        print("File location issues :\n", e)
+    """
+    except Exception as e:
+        print(e)
+    """
 def verify_directory(directory: str):
     try:
         if not os.path.exists(directory):
