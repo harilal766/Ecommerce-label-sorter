@@ -2,6 +2,7 @@ from PyPDF2 import PdfReader, PdfWriter
 import pdfplumber, json, re, os, sys, logging
 import pandas as pd
 from regex_patterns import *
+from pprint import pprint
 
 logging.getLogger('pdfminer').setLevel(logging.ERROR)
             
@@ -42,6 +43,7 @@ def main():
         except Exception as e:
             print(e)
         else:
+            """
             # Creating a folder in the name of the input file
             out_folder = input_dir.replace(".pdf","")
             if not os.path.exists(out_folder):
@@ -54,8 +56,8 @@ def main():
                     input_pdf_dir = input_dir, page_nums = sorted_pages, 
                     output_directory = out_folder, out_file = out_pdf_name
                 )
-            
-            print(summary_dict)
+            """
+            pprint(summary_dict)
             return summary_dict
 
 def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_num:int):
@@ -70,7 +72,7 @@ def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_
             products_rows = products_table[:-3]
                                 
             item_count = len(products_rows)-1
-                            
+            product_qty = None
             # Deciding order type by reading the product table and types of items
             if len(products_rows) > 2:
                 status += f"Mixed orders, count : {item_count}."                
@@ -82,13 +84,15 @@ def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_
                     amazon_name_regex,"",product_description, flags = re.IGNORECASE
                 )
                 product_qty = products_rows[-1][3]
-                sorting_key = f"{product_name_match.replace("\n"," ")} - {product_qty} qty"
+                #sorting_key = f"{product_name_match.replace("\n"," ")} - {product_qty} qty"
+                sorting_key = product_name_match.replace("\n"," ")
                     
             # populating summary dict based on the order condition
             create_shipment_summary(
-                sorting_key = sorting_key, 
-                summary_dict = summary_dict, page_nums = [page_num-1, page_num]
+                sorting_key = sorting_key, summary_dict = summary_dict, 
+                page_nums = [page_num-1, page_num], qty = product_qty
             )
+            
         # Handling QR code and Overlapping page
         else:
             if re.findall(r'^Tax Invoice/Bill of Supply/Cash Memo',page_text):
@@ -100,12 +104,35 @@ def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_
     except Exception as e:
         print(e)
 
-def create_shipment_summary(sorting_key:str, summary_dict, page_nums:list):
+def create_shipment_summary(
+    sorting_key:str, summary_dict, page_nums:list, qty : str
+    ) -> None:
     try:
+        # different conditions for mixed and single items
         # sorting key initialization
-        if sorting_key not in summary_dict.keys():
-            summary_dict[sorting_key] = []    
-        summary_dict[sorting_key] += page_nums
+        # The line `if sorti` is incomplete and does not exist in the provided code snippet. It
+        # seems like there might have been a typo or an incomplete statement. If you can provide
+        # more context or clarify the specific line of code you are referring to, I would be
+        # happy to help explain it.
+        print(sorting_key)
+        
+        numbers_list = None
+        # Adding sorting key if not present
+        if sorting_key not in summary_dict.keys(): 
+            if sorting_key == "Mixed":
+                summary_dict[sorting_key] = []
+            else:
+                summary_dict[sorting_key] = {}
+
+        if sorting_key in summary_dict.keys():
+            if sorting_key == "Mixed":
+                numbers_list += summary_dict[sorting_key]
+            else:
+                if qty not in summary_dict[sorting_key].keys():
+                    summary_dict[sorting_key][qty] = []
+                numbers_list = summary_dict[sorting_key][qty]
+        numbers_list += page_nums
+        
     except Exception as e:
         print(e)
 
