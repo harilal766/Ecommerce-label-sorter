@@ -43,7 +43,7 @@ def main():
         except Exception as e:
             print(e)
         else:
-            """
+            
             # Creating a folder in the name of the input file
             out_folder = input_dir.replace(".pdf","")
             if not os.path.exists(out_folder):
@@ -51,13 +51,20 @@ def main():
             
             # verify the summary dict is populated
             # store the sorted orders into their respective files in the target directory
-            for out_pdf_name, sorted_pages in summary_dict.items():
-                create_pdf(
-                    input_pdf_dir = input_dir, page_nums = sorted_pages, 
-                    output_directory = out_folder, out_file = out_pdf_name
-                )
-            """
-            pprint(summary_dict)
+            
+            for sorted_prodname, keys in summary_dict.items():
+                if sorted_prodname == "Mixed":
+                    create_pdf(
+                        input_pdf_dir = input_dir, sorted_page_nums = keys, 
+                        output_directory = out_folder, out_file = sorted_prodname
+                    )
+                else:
+                    for sorted_qty in keys.keys():
+                        create_pdf(
+                            input_pdf_dir = input_dir, sorted_page_nums = keys, 
+                            output_directory = out_folder, out_file = f"{sorted_prodname} - {sorted_qty}"
+                        )
+                        
             return summary_dict
 
 def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_num:int):
@@ -100,7 +107,7 @@ def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_
             else:
                 status += "Qr code page"
                         
-        print(status, end = ", " if "Qr code page" in status else None)
+        #print(status, end = ", " if "Qr code page" in status else None)
     except Exception as e:
         print(e)
 
@@ -114,56 +121,46 @@ def create_shipment_summary(
         # seems like there might have been a typo or an incomplete statement. If you can provide
         # more context or clarify the specific line of code you are referring to, I would be
         # happy to help explain it.
-        print(sorting_key)
         
         numbers_list = None
         # Adding sorting key if not present
         if sorting_key not in summary_dict.keys(): 
-            if sorting_key == "Mixed":
-                summary_dict[sorting_key] = []
-            else:
-                summary_dict[sorting_key] = {}
+            summary_dict[sorting_key] = [] if sorting_key == "Mixed" else {}
 
-        if sorting_key in summary_dict.keys():
-            if sorting_key == "Mixed":
-                numbers_list += summary_dict[sorting_key]
-            else:
-                if qty not in summary_dict[sorting_key].keys():
-                    summary_dict[sorting_key][qty] = []
-                numbers_list = summary_dict[sorting_key][qty]
+        if sorting_key == "Mixed":
+            numbers_list = summary_dict[sorting_key]
+        else:
+            if qty not in summary_dict[sorting_key].keys():
+                summary_dict[sorting_key][qty] = []
+            numbers_list = summary_dict[sorting_key][qty]
         numbers_list += page_nums
         
     except Exception as e:
         print(e)
 
-def create_pdf(input_pdf_dir: str, page_nums: list, out_file:str, output_directory:str):
-    try:
-        # verify the pdf file exists
-        # Verify the page contains something
-        if len(page_nums) > 0:
-            # Init
-            reader = PdfReader(input_pdf_dir); writer = PdfWriter()
-            for page in page_nums:
-                writer.add_page(reader.pages[page-1])
+def create_pdf(input_pdf_dir: str, sorted_page_nums: list, out_file:str, output_directory:str):
+    reader = PdfReader(input_pdf_dir); writer = PdfWriter()
+    out_file = re.sub(r'\|',",",out_file)
+    
+    order_count = int(len(sorted_page_nums)/2)
+    output_directory = os.path.join(
+        output_directory, f"{out_file.replace("/"," ")} - {order_count} Order{"s" if order_count > 1 else ""}.pdf"
+    )
+    for page in sorted_page_nums:
+        try:
+            # verify the pdf file exists
+            # Verify the page contains something
+            if len(sorted_page_nums) > 0:
+                # Init
+                writer.add_page(reader.pages[int(page)-1])
                 
-            order_count = int(len(page_nums)/2)
-            # Sanitizing out file name
-            out_file = re.sub(r'\|',",",out_file)
-            #print(out_file)
-            
-            output_directory = os.path.join(
-                output_directory, f"{out_file.replace("/"," ")} - {order_count} Order{"s" if order_count > 1 else ""}.pdf"
-            )
-            #print(output_directory)
-            if output_directory:
-                with open(output_directory,"wb") as output_pdf:
-                    writer.write(output_pdf)
-        else:
-            sys.exit("Enter page nums")
-    except FileNotFoundError as e:
-        print("File location issues :\n", e)
-    except Exception as e:
-        print(e)
+                if output_directory:
+                    with open(output_directory,"wb") as output_pdf:
+                        writer.write(output_pdf)
+            else:
+                sys.exit("Enter page nums")
+        except FileNotFoundError as e:
+            print("File location issues :\n", e)
 
 def verify_directory(directory: str):
     try:
