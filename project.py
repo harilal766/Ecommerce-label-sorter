@@ -170,10 +170,13 @@ def create_pdf(input_pdf_dir: str, sorted_page_nums: list, out_file:str, output_
     except Exception as e:
         print(e)
     """
-def verify_directory(directory: str):
+    
+def verify_directory(directory: str) -> None:
     try:
         if not os.path.exists(directory):
             sys.exit(f"The directory : {directory} does not exist.")
+        else:
+            return True
     except Exception as e:
         print(e)
 
