@@ -1,12 +1,13 @@
-from PyPDF2 import PdfReader, PdfWriter
+from pypdf import PdfReader, PdfWriter
 import pdfplumber, json, re, os, sys, logging
 import pandas as pd
 from regex_patterns import *
 from pprint import pprint
+from sorting_algorithms import *
 
 logging.getLogger('pdfminer').setLevel(logging.ERROR)
             
-def main():
+def main() -> dict:
     summary_dict = {}
     while True:
         try:
@@ -66,50 +67,6 @@ def main():
                         )
             return summary_dict 
 
-def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_num:int):
-    sorting_key = None
-    try:
-        # start of amazon function in the future
-        order_id_match = re.findall(amazon_order_id_pattern,page_text)
-        # Ensuring invoice pages
-        if order_id_match:
-            status += "Invoice page, "
-            products_table = page_tables[0]
-            products_rows = products_table[:-3]
-                                
-            item_count = len(products_rows)-1
-            product_qty = None
-            # Deciding order type by reading the product table and types of items
-            if len(products_rows) > 2:
-                status += f"Mixed orders, count : {item_count}."                
-                sorting_key = "Mixed"
-            else:
-                status += "Single item order."
-                product_description = products_rows[-1][1] 
-                product_name_match = re.sub(
-                    amazon_name_regex,"",product_description, flags = re.IGNORECASE
-                )
-                product_qty = products_rows[-1][3]
-                #sorting_key = f"{product_name_match.replace("\n"," ")} - {product_qty} qty"
-                sorting_key = product_name_match.replace("\n"," ")
-                    
-            # populating summary dict based on the order condition
-            create_shipment_summary(
-                sorting_key = sorting_key, summary_dict = summary_dict, 
-                page_nums = [page_num-1, page_num], qty = product_qty
-            )
-            
-        # Handling QR code and Overlapping page
-        else:
-            if re.findall(r'^Tax Invoice/Bill of Supply/Cash Memo',page_text):
-                status += "Overlapping page."
-            else:
-                status += "Qr code page"
-                        
-        #print(status, end = ", " if "Qr code page" in status else None)
-    except Exception as e:
-        print(e)
-
 def create_shipment_summary(
     sorting_key:str, summary_dict, page_nums:list, qty : str
     ) -> None:
@@ -137,7 +94,7 @@ def create_shipment_summary(
     except Exception as e:
         print(e)
 
-def create_pdf(input_pdf_dir: str, sorted_page_nums: list, out_file:str, output_directory:str):
+def create_pdf(input_pdf_dir: str, sorted_page_nums: list, out_file:str, output_directory:str) -> None:
     try:
         # verify the pdf file exists
         # Verify the page contains something
@@ -180,5 +137,23 @@ def verify_directory(directory: str) -> None:
     except Exception as e:
         print(e)
 
+def find_platform(pdf_path : str) -> str:
+    """Finding the platform by reading the pdf file
+    
+    Args:
+        pdf_path (str): Filepath of the label pdf file
+
+    Returns:
+        str: Name of the Ecommerce platfrom to which the pdf belongs to, Eg : Amazon, Flipkart etc.
+    """
+    try:
+        with pdfplumber.open(pdf_path,"r") as pdf_file:
+            for page in pdf_file.pages:
+                print(page)
+    except Exception as e:
+        print(e)
+    else:
+        pass
+    
 if __name__ == "__main__":
     main()

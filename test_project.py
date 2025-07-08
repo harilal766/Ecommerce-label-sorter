@@ -5,34 +5,36 @@ import json, os
 """
 with open("creds.json","r") as json_file:
     credentials = json.load(json_file)
-    
-    input_filepath = credentials["input_filepath"]
-    
+    input_filepath = credentials["amazon_input_filepath"]
+    out_dir = input_filepath.replace(".pdf", "")
     
 def test_main():
     assert verify_directory(input_filepath) == True
 
 def test_sort_amazon_label():
+    """
+    Send an amazon pdf file and verify it has invoice pages
+    """
     pass
 
 def test_create_shipment_summary():
+    """
+    assert the summary dict was empty
+    run the script for shipping summary
+    assert the summary dict is populated
+    """
     pass
 
+def test_verify_directory():
+    # Verify output directory exists
+    assert os.path.isdir(out_dir)
+    
 def test_create_pdf():
     """
     create sorted pdf files
     Verify a folder in the filename is created and it contains sorted pdf files
     """
-    test_dir = input_filepath.replace(".pdf", "")
-    
-    # verify output directory exists
-    assert os.path.isdir(test_dir)
-    
-    # to verify all the files in the dir is pdf
-    pdf_list = os.listdir(test_dir)
-    assert sum(".pdf" in pdf for pdf in pdf_list) == 5
-
-def test_verify_directory():
-    pass
-
-#print(os.listdir(input_filepath.replace(".pdf","")))
+    # Verify all the files in the dir is pdf
+    pdf_list = os.listdir(out_dir)
+    pdf_count = sum("pdf" == pdf.split(".")[-1] for pdf in pdf_list)
+    assert pdf_count == len(pdf_list)
