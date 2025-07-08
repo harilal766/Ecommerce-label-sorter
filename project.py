@@ -1,6 +1,5 @@
 from pypdf import PdfReader, PdfWriter
-import pdfplumber, json, re, os, sys, logging
-import pandas as pd
+import pdfplumber, re, os, sys, logging
 from regex_patterns import *
 from pprint import pprint
 from sorting_algorithms import *
