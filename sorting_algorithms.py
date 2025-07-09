@@ -1,9 +1,39 @@
 import re
 from regex_patterns import *
-from project import create_shipment_summary
+import pdfplumber
 
+def find_platform(pdf_path : str) -> str:
+    """Finding the platform by reading the pdf file
+    
+    Args:
+        pdf_path (str): Filepath of the label pdf file
+
+    Returns:
+        str: Name of the Ecommerce platfrom to which the pdf belongs to, Eg : Amazon, Flipkart etc.
+    """
+    platform = None
+    try:
+        with pdfplumber.open(pdf_path) as pdf_file:
+            total_pages = 0; amazon_count = 0 
+            for page_index, page in enumerate(pdf_file.pages):
+                total_pages += 1
+                page_text = page.extract_text(); page_tables = page.extract_tables()
+                
+                # finding platfrom based on the order id
+                amazon_order_id_match = re.findall(amazon_order_id_pattern,page_text)
+                if amazon_order_id_match:
+                    amazon_count +=1
+    except Exception as e:
+        print(e)
+    else:
+        if amazon_count == total_pages/2:
+            platform = "Amazon"
+        return platform
+
+# Sorting algorithms
 def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_num:int) -> None:
     sorting_key = None
+    from project import create_shipment_summary
     try:
         # start of amazon function in the future
         order_id_match = re.findall(amazon_order_id_pattern,page_text)
@@ -42,6 +72,6 @@ def sort_amazon_label(status:str,summary_dict: dict,page_text,page_tables, page_
             else:
                 status += "Qr code page"
                         
-        #print(status, end = ", " if "Qr code page" in status else None)
+        print(status, end = ", " if "Qr code page" in status else None)
     except Exception as e:
         print(e)

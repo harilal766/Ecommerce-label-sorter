@@ -17,7 +17,7 @@ def main() -> dict:
             #verify_directory(input_dir)
             
             # Platform setting, need to be automated in the future
-            platform = "Amazon"
+            platform = find_platform(input_dir)
             with pdfplumber.open(input_dir) as pdf_file:
                 for page_index, page in enumerate(pdf_file.pages):
                     page_text = page.extract_text(); page_tables = page.extract_tables()
@@ -39,7 +39,7 @@ def main() -> dict:
         except AttributeError:
             print("Attribute issues at the regex matching.")
         except FileNotFoundError:
-            print(f"{input_dir} does not exist, Try again..")
+            print(f"The filepath : {input_dir} does not exist, check the input and try again..")
         except Exception as e:
             print(e)
         else:
@@ -65,7 +65,7 @@ def main() -> dict:
                             output_directory = out_folder, out_file = f"{sorted_prodname} - {sorted_qty}"
                         )
             return summary_dict 
-
+                
 def create_shipment_summary(
     sorting_key:str, summary_dict, page_nums:list, qty : str
     ) -> None:
@@ -135,24 +135,6 @@ def verify_directory(directory: str) -> None:
             return True
     except Exception as e:
         print(e)
-
-def find_platform(pdf_path : str) -> str:
-    """Finding the platform by reading the pdf file
-    
-    Args:
-        pdf_path (str): Filepath of the label pdf file
-
-    Returns:
-        str: Name of the Ecommerce platfrom to which the pdf belongs to, Eg : Amazon, Flipkart etc.
-    """
-    try:
-        with pdfplumber.open(pdf_path,"r") as pdf_file:
-            for page in pdf_file.pages:
-                print(page)
-    except Exception as e:
-        print(e)
-    else:
-        pass
     
 if __name__ == "__main__":
     main()

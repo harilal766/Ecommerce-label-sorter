@@ -1,15 +1,24 @@
 from project import *
+from sorting_algorithms import *
 import json, os
 """
     Verify the pdf file exists
 """
 with open("creds.json","r") as json_file:
     credentials = json.load(json_file)
-    input_filepath = credentials["amazon_input_filepath"]
-    out_dir = input_filepath.replace(".pdf", "")
+    amzn_input_filepath = credentials["amazon_input_filepath"]
+    out_dir = amzn_input_filepath.replace(".pdf", "")
     
 def test_main():
-    assert verify_directory(input_filepath) == True
+    assert verify_directory(amzn_input_filepath) == True
+    
+def test_verify_directory():
+    # Verify output directory exists
+    assert os.path.isdir(out_dir)
+
+def test_find_platform():
+    platform = find_platform(pdf_path=amzn_input_filepath)
+    assert platform == "Amazon"
 
 def test_sort_amazon_label():
     """
@@ -25,10 +34,6 @@ def test_create_shipment_summary():
     """
     pass
 
-def test_verify_directory():
-    # Verify output directory exists
-    assert os.path.isdir(out_dir)
-    
 def test_create_pdf():
     """
     create sorted pdf files
@@ -38,3 +43,6 @@ def test_create_pdf():
     pdf_list = os.listdir(out_dir)
     pdf_count = sum("pdf" == pdf.split(".")[-1] for pdf in pdf_list)
     assert pdf_count == len(pdf_list)
+
+
+print(find_platform(amzn_input_filepath))
