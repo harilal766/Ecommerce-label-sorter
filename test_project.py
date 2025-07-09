@@ -9,9 +9,6 @@ with open("creds.json","r") as json_file:
     amzn_input_filepath = credentials["amazon_input_filepath"]
     out_dir = amzn_input_filepath.replace(".pdf", "")
     
-def test_main():
-    assert verify_directory(amzn_input_filepath) == True
-    
 def test_verify_directory():
     # Verify output directory exists
     assert os.path.isdir(out_dir)
@@ -43,6 +40,3 @@ def test_create_pdf():
     pdf_list = os.listdir(out_dir)
     pdf_count = sum("pdf" == pdf.split(".")[-1] for pdf in pdf_list)
     assert pdf_count == len(pdf_list)
-
-
-print(find_platform(amzn_input_filepath))

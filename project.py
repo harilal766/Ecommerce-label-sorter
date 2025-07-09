@@ -17,25 +17,18 @@ def main() -> dict:
             #verify_directory(input_dir)
             
             # Platform setting, need to be automated in the future
-            platform = find_platform(input_dir)
-            with pdfplumber.open(input_dir) as pdf_file:
-                for page_index, page in enumerate(pdf_file.pages):
-                    page_text = page.extract_text(); page_tables = page.extract_tables()
-                    
-                    page_number = f"{page_index+1} : "
-                    
-                    # Assigning the sorting algorithm based on the platform
-                    sorting_dict = {
-                        "amazon" : sort_amazon_label(page_number,summary_dict,page_text, page_tables, page_index+1),
-                    }
-                    # Sanitizing platform input
-                    platform = platform.strip().lower()
-                    # selecting sorting function based on the selection
-                    if platform in sorting_dict.keys():
-                        sorting_dict[platform]
-                    else:
-                        print("Unsupported platform")
-                        break
+            platform = find_platform(input_dir).strip().lower()
+            # selecting sorting function based on the selection
+            if platform:
+                with pdfplumber.open(input_dir) as pdf_file:
+                    for page_index, page in enumerate(pdf_file.pages):
+                        page_text = page.extract_text(); page_tables = page.extract_tables()
+                        page_number = f"{page_index+1} : "
+                        # Sanitizing platform input
+                        if platform == "amazon":
+                            sort_amazon_label(page_number,summary_dict,page_text, page_tables, page_index+1)
+            else:
+                sys.exit("Unsupported platform")        
         except AttributeError:
             print("Attribute issues at the regex matching.")
         except FileNotFoundError:
@@ -43,7 +36,6 @@ def main() -> dict:
         except Exception as e:
             print(e)
         else:
-            
             # Creating a folder in the name of the input file
             out_folder = input_dir.replace(".pdf","")
             if not os.path.exists(out_folder):

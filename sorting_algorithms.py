@@ -2,6 +2,13 @@ import re
 from regex_patterns import *
 import pdfplumber
 
+class Sort:
+    def __init__(self):
+        pass
+    
+    def find_platform():
+        pass
+    
 def find_platform(pdf_path : str) -> str:
     """Finding the platform by reading the pdf file
     
