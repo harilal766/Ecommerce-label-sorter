@@ -9,8 +9,9 @@ logging.getLogger('pdfminer').setLevel(logging.ERROR)
 def main() -> dict:
     summary_dict = {}
     while True:
+        welcome = ""
         try:
-            input_dir = input("Enter the input pdf file directory : ")
+            input_dir = input("Welcome to Shipping label sorter.\nPlease enter the input pdf filepath : ")
             # Remove the quote characters from the input directory string
             input_dir = re.sub(r'"|\'',"",input_dir)
             # Make sure the file exists
@@ -21,6 +22,8 @@ def main() -> dict:
             # selecting sorting function based on the selection
             if platform:
                 with pdfplumber.open(input_dir) as pdf_file:
+                    title = "PAGE INFO"
+                    print(f"\n{title}\n{"-"*len(title)}")
                     for page_index, page in enumerate(pdf_file.pages):
                         page_text = page.extract_text(); page_tables = page.extract_tables()
                         page_number = f"{page_index+1} : "
@@ -43,19 +46,23 @@ def main() -> dict:
             
             # verify the summary dict is populated
             # store the sorted orders into their respective files in the target directory
-            
+            sort_title = "SORTING SUMMARY"
+            sort_debrief = [f"\n{sort_title}\n{"-"*len(sort_title)}"]
             for sorted_prodname, keys in summary_dict.items():
                 if sorted_prodname == "Mixed":
                     create_pdf(
                         input_pdf_dir = input_dir, sorted_page_nums = keys, 
                         output_directory = out_folder, out_file = sorted_prodname
                     )
+                    sort_debrief.append(f"{sorted_prodname} : {len(keys)/2} Orders.")
                 else:
                     for sorted_qty,sorted_pages in keys.items():
                         create_pdf(
                             input_pdf_dir = input_dir, sorted_page_nums = sorted_pages, 
                             output_directory = out_folder, out_file = f"{sorted_prodname} - {sorted_qty}"
                         )
+                        sort_debrief.append(f"{sorted_prodname} : ")
+            print('\n'.join(sort_debrief))
             return summary_dict 
                 
 def create_shipment_summary(
@@ -108,8 +115,6 @@ def create_pdf(input_pdf_dir: str, sorted_page_nums: list, out_file:str, output_
             if output_directory:
                 with open(output_directory,"wb") as output_pdf:
                     writer.write(output_pdf)
-            
-            
         else:
             sys.exit("Enter page nums")
     except FileNotFoundError as e:
