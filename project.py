@@ -5,45 +5,48 @@ from pprint import pprint
 from sorting_algorithms import *
 
 logging.getLogger('pdfminer').setLevel(logging.ERROR)
+exit_key = "E"
+quit_message = f"Press {exit_key} key to exit the program."
             
 def main(input_dir = None) -> dict:
     sorted_dict = None
     print("Welcome to Shipping label sorter")
-    while True:
-        try:
-            if not input_dir:
-                input_dir = input("Please enter the input pdf filepath : ")
-            input_dir = re.sub(r'"|\'',"",input_dir)
-            platform = find_platform(input_dir).strip().lower()
+
+    try:
+        if not input_dir:
+            input_dir = input("Please enter the input pdf filepath : ")
+            
+        input_dir = re.sub(r'"|\'',"",input_dir)
+        if os.path.exists(input_dir):
+            platform = find_platform(input_dir)
             if platform:
-                sort_inst = Sort(pdf_path=input_dir, platform='amazon')
+                sort_inst = Sort(pdf_path=input_dir, platform=platform.strip().lower())
                 sorted_dict = sort_inst.get_sorted_summary()
             else:
-                sys.exit("Unsupported platform")        
-        except AttributeError:
-            print("Attribute issues at the regex matching.")
-        except FileNotFoundError:
-            print(f"The filepath : {input_dir} does not exist, check the input and try again..")
-        except Exception as e:
-            print(e)
+                sys.exit("Unsupported platform, Exiting....")  
         else:
-            if sorted_dict:
-                out_folder = input_dir.replace(".pdf","")
-                if not os.path.exists(out_folder):
-                    os.makedirs(out_folder)
-                for sorted_prodname, keys in sorted_dict.items():
-                    if sorted_prodname == "Mixed":
+            print(f"This filepath does not exist, check the input and try again..")
+    except AttributeError:
+        pass
+    else:
+        if sorted_dict:
+            out_folder = input_dir.replace(".pdf","")
+            if not os.path.exists(out_folder):
+                os.makedirs(out_folder)
+                    
+            for sorted_prodname, value in sorted_dict.items():
+                if sorted_prodname == "Mixed":
+                    create_pdf(
+                        input_pdf_dir = input_dir, sorted_page_nums = value, 
+                        output_directory = out_folder, out_file = sorted_prodname
+                    )
+                else:
+                    for sorted_qty,sorted_pages in value.items():
                         create_pdf(
-                            input_pdf_dir = input_dir, sorted_page_nums = keys, 
-                            output_directory = out_folder, out_file = sorted_prodname
+                            input_pdf_dir = input_dir, sorted_page_nums = sorted_pages, 
+                            output_directory = out_folder, out_file = f"{sorted_prodname} - {sorted_qty}"
                         )
-                    else:
-                        for sorted_qty,sorted_pages in keys.items():
-                            create_pdf(
-                                input_pdf_dir = input_dir, sorted_page_nums = sorted_pages, 
-                                output_directory = out_folder, out_file = f"{sorted_prodname} - {sorted_qty}"
-                            )
-                return sorted_dict
+            return sorted_dict
 
 def find_platform(pdf_path : str) -> str:
     """Finding the platform by reading the pdf file
@@ -104,15 +107,6 @@ def create_pdf(input_pdf_dir: str, sorted_page_nums: list, out_file:str, output_
     except Exception as e:
         print(e)
     """
-    
-def verify_directory(directory: str) -> None:
-    try:
-        if not os.path.exists(directory):
-            sys.exit(f"The directory : {directory} does not exist.")
-        else:
-            return True
-    except Exception as e:
-        print(e)
     
 if __name__ == "__main__":
     main()
