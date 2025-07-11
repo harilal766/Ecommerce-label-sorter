@@ -6,30 +6,18 @@ from sorting_algorithms import *
 
 logging.getLogger('pdfminer').setLevel(logging.ERROR)
             
-def main() -> dict:
-    summary_dict = {}
+def main(input_dir = None) -> dict:
+    sorted_dict = None
+    print("Welcome to Shipping label sorter")
     while True:
-        welcome = ""
         try:
-            input_dir = input("Welcome to Shipping label sorter.\nPlease enter the input pdf filepath : ")
-            # Remove the quote characters from the input directory string
+            if not input_dir:
+                input_dir = input("Please enter the input pdf filepath : ")
             input_dir = re.sub(r'"|\'',"",input_dir)
-            # Make sure the file exists
-            #verify_directory(input_dir)
-            
-            # Platform setting, need to be automated in the future
             platform = find_platform(input_dir).strip().lower()
-            # selecting sorting function based on the selection
             if platform:
-                with pdfplumber.open(input_dir) as pdf_file:
-                    title = "PAGE INFO"
-                    print(f"\n{title}\n{"-"*len(title)}")
-                    for page_index, page in enumerate(pdf_file.pages):
-                        page_text = page.extract_text(); page_tables = page.extract_tables()
-                        page_number = f"{page_index+1} : "
-                        # Sanitizing platform input
-                        if platform == "amazon":
-                            sort_amazon_label(page_number,summary_dict,page_text, page_tables, page_index+1)
+                sort_inst = Sort(pdf_path=input_dir, platform='amazon')
+                sorted_dict = sort_inst.get_sorted_summary()
             else:
                 sys.exit("Unsupported platform")        
         except AttributeError:
@@ -39,32 +27,52 @@ def main() -> dict:
         except Exception as e:
             print(e)
         else:
-            # Creating a folder in the name of the input file
-            out_folder = input_dir.replace(".pdf","")
-            if not os.path.exists(out_folder):
-                os.makedirs(out_folder)
-            
-            # verify the summary dict is populated
-            # store the sorted orders into their respective files in the target directory
-            sort_title = "SORTING SUMMARY"
-            sort_debrief = [f"\n{sort_title}\n{"-"*len(sort_title)}"]
-            for sorted_prodname, keys in summary_dict.items():
-                if sorted_prodname == "Mixed":
-                    create_pdf(
-                        input_pdf_dir = input_dir, sorted_page_nums = keys, 
-                        output_directory = out_folder, out_file = sorted_prodname
-                    )
-                    sort_debrief.append(f"{sorted_prodname} : {len(keys)/2} Orders.")
-                else:
-                    for sorted_qty,sorted_pages in keys.items():
+            if sorted_dict:
+                out_folder = input_dir.replace(".pdf","")
+                if not os.path.exists(out_folder):
+                    os.makedirs(out_folder)
+                for sorted_prodname, keys in sorted_dict.items():
+                    if sorted_prodname == "Mixed":
                         create_pdf(
-                            input_pdf_dir = input_dir, sorted_page_nums = sorted_pages, 
-                            output_directory = out_folder, out_file = f"{sorted_prodname} - {sorted_qty}"
+                            input_pdf_dir = input_dir, sorted_page_nums = keys, 
+                            output_directory = out_folder, out_file = sorted_prodname
                         )
-                        sort_debrief.append(f"{sorted_prodname} : ")
-            print('\n'.join(sort_debrief))
-            return summary_dict 
+                    else:
+                        for sorted_qty,sorted_pages in keys.items():
+                            create_pdf(
+                                input_pdf_dir = input_dir, sorted_page_nums = sorted_pages, 
+                                output_directory = out_folder, out_file = f"{sorted_prodname} - {sorted_qty}"
+                            )
+                return sorted_dict 
+
+def find_platform(pdf_path : str) -> str:
+    """Finding the platform by reading the pdf file
+    
+    Args:
+        pdf_path (str): Filepath of the label pdf file
+
+    Returns:
+        str: Name of the Ecommerce platfrom to which the pdf belongs to, Eg : Amazon, Flipkart etc.
+    """
+    platform = None
+    try:
+        with pdfplumber.open(pdf_path) as pdf_file:
+            total_pages = 0; amazon_count = 0 
+            for page_index, page in enumerate(pdf_file.pages):
+                total_pages += 1
+                page_text = page.extract_text(); page_tables = page.extract_tables()
                 
+                # finding platfrom based on the order id
+                amazon_order_id_match = re.findall(amazon_order_id_pattern,page_text)
+                if amazon_order_id_match:
+                    amazon_count +=1
+    except Exception as e:
+        print(e)
+    else:
+        if amazon_count == total_pages/2:
+            platform = "Amazon"
+        return platform
+
 def create_shipment_summary(
     sorting_key:str, summary_dict, page_nums:list, qty : str
     ) -> None:
