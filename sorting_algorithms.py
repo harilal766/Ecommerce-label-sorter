@@ -8,12 +8,35 @@ class Sort:
         self.input_filepath = pdf_path
         self.platform = platform
         
+    def create_shipment_summary(self, sorting_key:str, summary_dict, page_nums:list, qty : str) -> None:
+        try:
+            # different conditions for mixed and single items
+            # sorting key initialization
+            # The line `if sorti` is incomplete and does not exist in the provided code snippet. It
+            # seems like there might have been a typo or an incomplete statement. If you can provide
+            # more context or clarify the specific line of code you are referring to, I would be
+            # happy to help explain it.
+            
+            numbers_list = None
+            # Adding sorting key if not present
+            if sorting_key not in summary_dict.keys(): 
+                summary_dict[sorting_key] = [] if sorting_key == "Mixed" else {}
+
+            if sorting_key == "Mixed":
+                numbers_list = summary_dict[sorting_key]
+            else:
+                if qty not in summary_dict[sorting_key].keys():
+                    summary_dict[sorting_key][qty] = []
+                numbers_list = summary_dict[sorting_key][qty]
+            numbers_list += page_nums
+            
+        except Exception as e:
+            print(e)
+        
     def get_sorted_summary(self):
         title = None
         try:
             with pdfplumber.open(self.input_filepath) as pdf_file:
-                title = "PAGE INFO"
-                print(f"\n{title}\n{"-"*len(title)}")
                 for page_index, page in enumerate(pdf_file.pages):
                     page_text = page.extract_text(); page_tables = page.extract_tables()
                     page_number = f"{page_index+1} : "
@@ -29,7 +52,6 @@ class Sort:
         self,status:str,summary_dict: dict,
         page_text,page_tables, page_num:int) -> None:
         sorting_key = None
-        from project import create_shipment_summary
         try:
             # start of amazon function in the future
             order_id_match = re.findall(amazon_order_id_pattern,page_text)
@@ -56,7 +78,7 @@ class Sort:
                     sorting_key = product_name_match.replace("\n"," ")
                         
                 # populating summary dict based on the order condition
-                create_shipment_summary(
+                self.create_shipment_summary(
                     sorting_key = sorting_key, summary_dict = summary_dict, 
                     page_nums = [page_num-1, page_num], qty = product_qty
                 )

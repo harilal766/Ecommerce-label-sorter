@@ -43,7 +43,7 @@ def main(input_dir = None) -> dict:
                                 input_pdf_dir = input_dir, sorted_page_nums = sorted_pages, 
                                 output_directory = out_folder, out_file = f"{sorted_prodname} - {sorted_qty}"
                             )
-                return sorted_dict 
+                return sorted_dict
 
 def find_platform(pdf_path : str) -> str:
     """Finding the platform by reading the pdf file
@@ -72,33 +72,6 @@ def find_platform(pdf_path : str) -> str:
         if amazon_count == total_pages/2:
             platform = "Amazon"
         return platform
-
-def create_shipment_summary(
-    sorting_key:str, summary_dict, page_nums:list, qty : str
-    ) -> None:
-    try:
-        # different conditions for mixed and single items
-        # sorting key initialization
-        # The line `if sorti` is incomplete and does not exist in the provided code snippet. It
-        # seems like there might have been a typo or an incomplete statement. If you can provide
-        # more context or clarify the specific line of code you are referring to, I would be
-        # happy to help explain it.
-        
-        numbers_list = None
-        # Adding sorting key if not present
-        if sorting_key not in summary_dict.keys(): 
-            summary_dict[sorting_key] = [] if sorting_key == "Mixed" else {}
-
-        if sorting_key == "Mixed":
-            numbers_list = summary_dict[sorting_key]
-        else:
-            if qty not in summary_dict[sorting_key].keys():
-                summary_dict[sorting_key][qty] = []
-            numbers_list = summary_dict[sorting_key][qty]
-        numbers_list += page_nums
-        
-    except Exception as e:
-        print(e)
 
 def create_pdf(input_pdf_dir: str, sorted_page_nums: list, out_file:str, output_directory:str) -> None:
     try:
