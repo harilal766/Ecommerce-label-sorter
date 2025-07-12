@@ -17,9 +17,10 @@ def test_find_platform():
     assert find_platform(pdf_path=amzn_input_filepath) == 'Amazon'
     
 
-
+"""
 sort = Sort(pdf_path=amzn_input_filepath,platform='amazon')
-
 sorted_dict = sort.get_sorted_summary()
-
 print(sorted_dict)
+"""
+
+get_filepath()

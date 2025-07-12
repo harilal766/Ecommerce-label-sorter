@@ -14,9 +14,9 @@ def main(input_dir = None) -> dict:
 
     try:
         if not input_dir:
-            input_dir = input("Please enter the input pdf filepath : ")
+            input_dir = get_filepath()
             
-        input_dir = re.sub(r'"|\'',"",input_dir)
+        #input_dir = re.sub(r'"|\'',"",input_dir)
         if os.path.exists(input_dir):
             platform = find_platform(input_dir)
             if platform:
@@ -47,6 +47,19 @@ def main(input_dir = None) -> dict:
                             output_directory = out_folder, out_file = f"{sorted_prodname} - {sorted_qty}"
                         )
             return sorted_dict
+
+def get_filepath():
+    while True:
+        try:
+            filepath = str(input("Enter the pdf filepath: "))
+            filepath = re.sub(r'"|\'',"",filepath)
+            if os.path.exists(filepath):
+                print("File verified..")
+                return filepath
+            else:
+                print(f"The path does not exist, try again")
+        except FileNotFoundError:
+            print("Try again")
 
 def find_platform(pdf_path : str) -> str:
     """Finding the platform by reading the pdf file
