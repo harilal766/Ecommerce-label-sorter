@@ -51,7 +51,7 @@ def main(input_dir = None) -> dict:
 def get_filepath():
     while True:
         try:
-            filepath = str(input("Enter the pdf filepath: "))
+            filepath = str(input("Enter the pdf filepath : "))
             filepath = re.sub(r'"|\'',"",filepath)
             if os.path.exists(filepath):
                 print("File verified..")
