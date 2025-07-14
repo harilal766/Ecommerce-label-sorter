@@ -9,9 +9,8 @@ exit_key = "E"
 quit_message = f"Press {exit_key} key to exit the program."
             
 def main(input_dir = None) -> dict:
-    sorted_dict = None
-    print("Welcome to Shipping label sorter")
-
+    status_list = ["\nSorting Summary"]; sorted_dict = None
+    print("Welcome to Shipping label sorter\n")
     try:
         if not input_dir:
             input_dir = get_filepath()
@@ -20,6 +19,8 @@ def main(input_dir = None) -> dict:
         if os.path.exists(input_dir):
             platform = find_platform(input_dir)
             if platform:
+                print(f"Platform : {platform}")
+                print("\nSorted pages")
                 sort_inst = Sort(pdf_path=input_dir, platform=platform.strip().lower())
                 sorted_dict = sort_inst.get_sorted_summary()
             else:
@@ -40,21 +41,25 @@ def main(input_dir = None) -> dict:
                         input_pdf_dir = input_dir, sorted_page_nums = value, 
                         output_directory = out_folder, out_file = sorted_prodname
                     )
+                    status_list.append(f"{sorted_prodname} : {int(len(value)/2)} Orders.")
                 else:
                     for sorted_qty,sorted_pages in value.items():
                         create_pdf(
                             input_pdf_dir = input_dir, sorted_page_nums = sorted_pages, 
                             output_directory = out_folder, out_file = f"{sorted_prodname} - {sorted_qty}"
                         )
+                        status_list.append(f"{sorted_prodname} - {sorted_qty} : {int(len(sorted_pages)/2)} Orders.")
+            print(f"\nSorted files saved to : {out_folder}")
+            print("\n".join(status_list))
             return sorted_dict
 
-def get_filepath():
+def get_filepath() -> str:
     while True:
         try:
             filepath = str(input("Enter the pdf filepath : "))
             filepath = re.sub(r'"|\'',"",filepath)
             if os.path.exists(filepath):
-                print("File verified..")
+                print("\nFile verified..\n")
                 return filepath
             else:
                 print(f"The path does not exist, try again")
