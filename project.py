@@ -17,7 +17,8 @@ def main(input_dir = None) -> dict:
             
         #input_dir = re.sub(r'"|\'',"",input_dir)
         if os.path.exists(input_dir):
-            platform = find_platform(input_dir)
+            #platform = find_platform(input_dir)
+            platform = "Amazon"
             if platform:
                 print(f"Platform : {platform}")
                 print("\nSorted pages")
