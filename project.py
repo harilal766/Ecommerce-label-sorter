@@ -22,7 +22,9 @@ def main(input_dir = None) -> dict:
             if platform:
                 print(f"Platform : {platform}")
                 print("\nSorted pages")
+                
                 sort_inst = Sort(pdf_path=input_dir, platform=platform.strip().lower())
+                
                 sorted_dict = sort_inst.get_sorted_summary()
             else:
                 sys.exit("Unsupported platform, Exiting....")  

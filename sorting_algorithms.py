@@ -41,8 +41,19 @@ class Sort:
                     page_text = page.extract_text(); page_tables = page.extract_tables()
                     page_number = f"{page_index+1} : "
                     # Sanitizing platform input
-                    if self.platform == "amazon":
-                        self.sort_amazon_label(page_number,self.summary_dict,page_text, page_tables, page_index+1)
+                    order_id_match = re.findall(amazon_order_id_pattern,page_text)
+                    
+                    # ADD  ORDER IDS LISTS GOT FILTERD BASED ON PAYMENT METHOD HERE
+                    cod = []     
+                    other = []  
+
+                    print(f"Check - {page_number} - {order_id_match}")
+                    
+                    check_list = other
+                    if len(order_id_match) == 1 and order_id_match[0] in check_list:
+                    
+                        if self.platform == "amazon":
+                            self.sort_amazon_label(page_number,self.summary_dict,page_text, page_tables, page_index+1)
         except Exception as e:
             print(e)
         else:
