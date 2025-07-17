@@ -1,5 +1,5 @@
 from project import *
-from sorting_algorithms import *
+from sorting_alrogithms.sorting_algorithms import *
 import json
 
 with open("creds.json","r") as json_file:

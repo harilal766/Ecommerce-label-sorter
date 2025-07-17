@@ -2,7 +2,7 @@ from pypdf import PdfReader, PdfWriter
 import pdfplumber, re, os, sys, logging
 from regex_patterns import *
 from pprint import pprint
-from sorting_algorithms import *
+from sorting_alrogithms.sorting_algorithms import *
 
 logging.getLogger('pdfminer').setLevel(logging.ERROR)
 exit_key = "E"
