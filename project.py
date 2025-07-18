@@ -28,10 +28,12 @@ def main(input_dir = None) -> dict:
                 sys.exit("Unsupported platform, Exiting....")  
         else:
             print(f"This filepath does not exist, check the input and try again..")
+        
     except AttributeError:
         pass
     else:
         if sorted_dict:
+            print(sorted_dict)
             out_folder = input_dir.replace(".pdf","")
             if not os.path.exists(out_folder):
                 os.makedirs(out_folder)
