@@ -2,7 +2,7 @@ from pypdf import PdfReader, PdfWriter
 import pdfplumber, re, os, sys, logging
 from regex_patterns import *
 from pprint import pprint
-from sorting_alrogithms.sorting_algorithms import *
+from sorting_alrogithms.sort import *
 
 logging.getLogger('pdfminer').setLevel(logging.ERROR)
 exit_key = "E"
@@ -18,7 +18,7 @@ def main(input_dir = None) -> dict:
         #input_dir = re.sub(r'"|\'',"",input_dir)
         if os.path.exists(input_dir):
             #platform = find_platform(input_dir)
-            platform = "Amazon"
+            platform = "Shopify"
             if platform:
                 print(f"Platform : {platform}")
                 print("\nSorted pages")

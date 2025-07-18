@@ -1,6 +1,7 @@
 import re
 from regex_patterns import *
 import pdfplumber
+from sorting_alrogithms.shopify import Shopify
 
 class Sort:
     def __init__(self,pdf_path,platform):
@@ -43,6 +44,11 @@ class Sort:
                     # Sanitizing platform input
                     if self.platform == "amazon":
                         self.sort_amazon_label(page_number,self.summary_dict,page_text, page_tables, page_index+1)
+                    elif self.platform == "shopify":
+                        shpy = Shopify()
+                        shpy.sort_shopify_label(page_text=page_text)
+                        
+                        
         except Exception as e:
             print(e)
         else:
@@ -93,3 +99,6 @@ class Sort:
             print(status, end = ", " if "Qr code page" in status else None)
         except Exception as e:
             print(e)
+            
+            
+    

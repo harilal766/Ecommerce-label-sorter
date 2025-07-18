@@ -1,5 +1,5 @@
 from project import *
-from sorting_alrogithms.sorting_algorithms import *
+from sorting_alrogithms.sort import *
 from credentials import amzn_input_filepath, non_existing_file, out_dir
 import json
 
