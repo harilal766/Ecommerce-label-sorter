@@ -34,6 +34,8 @@ def main(input_dir = None) -> dict:
     else:
         if sorted_dict:
             print(sorted_dict)
+            
+            
             out_folder = input_dir.replace(".pdf","")
             if not os.path.exists(out_folder):
                 os.makedirs(out_folder)
@@ -44,7 +46,8 @@ def main(input_dir = None) -> dict:
                         input_pdf_dir = input_dir, sorted_page_nums = value, 
                         output_directory = out_folder, out_file = sorted_prodname
                     )
-                    status_list.append(f"{sorted_prodname} : {int(len(value)/2)} Orders.")
+                    page_count = int(len(value))
+                    status_list.append(f"{sorted_prodname} : {page_count/2 if platform == "Amazon" else page_count} Orders.")
                 else:
                     for sorted_qty,sorted_pages in value.items():
                         create_pdf(
@@ -54,6 +57,7 @@ def main(input_dir = None) -> dict:
                         status_list.append(f"{sorted_prodname} - {sorted_qty} : {int(len(sorted_pages)/2)} Orders.")
             print(f"\nSorted files saved to : {out_folder}")
             print("\n".join(status_list))
+            
             return sorted_dict
 
 def get_filepath() -> str:

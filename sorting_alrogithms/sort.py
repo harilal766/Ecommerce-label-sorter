@@ -45,9 +45,8 @@ class Sort:
                     if self.platform == "amazon":
                         self.sort_amazon_label(page_number,self.summary_dict,page_text, page_tables, page_index+1)
                     elif self.platform == "shopify":
+                        #print(page_text,end="\n"+"-"*20+"\n")
                         self.sort_shopify_label(page_text=page_text,page_num=int(page_number.replace(" : ", "")))
-                        
-                print
                         
         except Exception as e:
             print(e)
@@ -102,24 +101,29 @@ class Sort:
             
     def sort_shopify_label(self, page_text, page_num):
         try:
+            #print(page_text)
             id_match = re.findall(r'(Order)\s(#\d{4,5})', page_text)
-            prod_desc_match = re.findall(r'(ITEMS QUANTITY\n)([a-zA-Z\s]*\n)(\d of \d\n)(\d{3,4}\sGM|ML)', page_text)
+            
+            prod_desc_match = re.findall(r'ITEMS QUANTITY\n(.*)\nThank you for shopping with us', page_text,flags=re.DOTALL)
             if id_match:
                 order_id = id_match[0][-1]
             
             if prod_desc_match:
                 matched = prod_desc_match[0]
                 
-                prodname = matched[1].replace("\n", "")
-                prod_variation = matched[-1].replace("\n", "")
+                match_split = matched.split("\n")
                 
-                prod_qty = matched[2].replace("\n", "")
-                prod_qty = re.sub(r'\sof\s\d',r'',prod_qty)
+                prod_qty = re.sub(r'\sof\s\d', r'',match_split[-2])
+                prod_variation = match_split[-1]
                 
-                print(f"{order_id} : {prodname} {prod_variation} - {prod_qty}")
+                prodname = match_split[0] + match_split[2] if len(match_split) == 4 else match_split[0]
+                
+                print(match_split)
+                print(f"{order_id} : {prodname}-{prod_variation}-{prod_qty}.")
+                
                 
                 self.create_shipment_summary(
-                    sorting_key=f"{prodname} {prod_variation}", summary_dict=self.summary_dict,
+                    sorting_key=prodname, summary_dict=self.summary_dict,
                     page_nums=[page_num], qty=prod_qty
                 )
                 
