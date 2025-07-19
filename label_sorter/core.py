@@ -1,12 +1,14 @@
-import pdfplumber, re, os
+import pdfplumber, re, os,sys
 from pypdf import PdfReader, PdfWriter
 
 from label_sorter.platforms.ecommerce.shopify import ShopifyLabel
 from label_sorter.platforms.ecommerce.amazon import AmazonLabel
 
 class LabelSorter:
-    def __init__(self):
+    def __init__(self, pdf_path):
         self.sorted_dict = {}
+        self.label_filepath = pdf_path
+        self.platform = self.find_platform(pdf_path=self.label_filepath)
         
     def find_platform(self,pdf_path : str) -> str:
         platform = None
@@ -26,46 +28,33 @@ class LabelSorter:
                     elif re.findall(AmazonLabel.order_id_pattern, page_text):
                         amazon_order_id_count += 1
                         
-                    
                 if total_pages == shopify_order_id_count:
                     platform = "Shopify"
                 # this condition is not complete, need to add overlap page detection
                 elif total_pages/2 == amazon_order_id_count:
                     platform == "Amazon"
             
+        except FileNotFoundError:
+            print(f"The file {pdf_path} does not exist.")
         except Exception as e:
             print(e)
         else:
             return platform
         
-    def get_filepath() -> str:
-        while True:
-            try:
-                filepath = str(input("Enter the pdf filepath : "))
-                filepath = re.sub(r'"|\'',"",filepath)
-                if os.path.exists(filepath):
-                    print("\nFile verified..\n")
-                    return filepath
-                else:
-                    print(f"The path does not exist, try again")
-            except FileNotFoundError:
-                print("Try again")
-
     def sort_label(self):
-        title = None
+        if not self.platform(pdf_path=self.label_filepath):
+            sys.exit("Unsupported Platform, exiting....")
         try:
-            print(self.platform)
-            
-            """
-            with pdfplumber.open(self.input_filepath) as pdf_file:
+            with pdfplumber.open(self.label_filepath) as pdf_file:
                 for page_index, page in enumerate(pdf_file.pages):
                     page_text = page.extract_text(); page_tables = page.extract_tables()
                     page_number = page_index+1
                     
                     if self.platform == "Shopify":
                         #print(page_text,end="\n"+"-"*20+"\n")
-                        self.sort_shopify_label(page_text=page_text,page_num=int(page_number))
-            """
+                        inst = ShopifyLabel()
+                        inst.sort_label(page_text=page_text,page_num=page_number)
+            
         except Exception as e:
             print(e)
         else:
