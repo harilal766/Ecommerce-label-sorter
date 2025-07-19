@@ -1,37 +1,37 @@
 import re
 
 class ShopifyLabel:
-    order_id_pattern = r'(Order)\s(#\d{4,5})'
-    product_name_pattern = r'ITEMS QUANTITY\n(.*)\nThank you for shopping with us'
+    def __init__(self):
+        self.order_id_pattern = r'#\d{4,5}'
+        self.product_name_pattern = r'ITEMS QUANTITY\n(.*)\nThank you for shopping with us'
+        self.qty_pattern = r'(\d+)\sof\s\d+'
+        self.page_debrief_dict = {
+            "order_id" : None, "sorting_key" : None, "qty" : None
+        }
     
-    def sort_label(self, page_text, page_num):
+    def analyze_page(self, label_text, page_num):
         try:
             #print(page_text)
-            id_match = re.findall(r'(Order)\s(#\d{4,5})', page_text)
+            id_match = re.findall(self.order_id_pattern, label_text)
             
-            prod_desc_match = re.findall(self.product_name_pattern, page_text,flags=re.DOTALL)
+            prod_desc_match = re.findall(self.product_name_pattern, label_text,flags=re.DOTALL)
             if id_match:
-                order_id = id_match[0][-1]
+                self.page_debrief_dict["order_id"] = id_match[0]
             
             if prod_desc_match:
-                matched = prod_desc_match[0]
+                # find the product name in string form
+                prod_desc_str = prod_desc_match[0].replace("\n"," ")
                 
-                match_split = matched.split("\n")
-                
-                prod_qty = re.sub(r'\sof\s\d', r'',match_split[-2])
-                prod_variation = match_split[-1]
-                
-                prodname = match_split[0] + match_split[2] if len(match_split) == 4 else match_split[0]
-                
-                print(match_split)
-                print(f"{order_id} : {prodname}-{prod_variation}-{prod_qty}.")
-                
-                
-                self.create_shipment_summary(
-                    sorting_key=prodname, summary_dict=self.summary_dict,
-                    page_nums=[page_num], qty=prod_qty
-                )
-                
+                # check it the order is mixed
+                item_count = len(re.findall(self.qty_pattern,prod_desc_str))
+                    
+                if item_count == 1:
+                    self.page_debrief_dict["qty"] = re.search(self.qty_pattern, prod_desc_str).group(1)
+                    self.page_debrief_dict["sorting_key"] = re.sub(self.qty_pattern,'',prod_desc_str)
+                else:
+                    self.page_debrief_dict["sorting_key"] = "Mixed"
+                    
+                return self.page_debrief_dict
         except Exception as e:
             print(e)
         else:

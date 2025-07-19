@@ -1,8 +1,10 @@
-import pdfplumber, re, os,sys
+import pdfplumber, re, os,sys, logging
 from pypdf import PdfReader, PdfWriter
 
 from label_sorter.platforms.ecommerce.shopify import ShopifyLabel
 from label_sorter.platforms.ecommerce.amazon import AmazonLabel
+
+logging.getLogger('pdfminer').setLevel(logging.ERROR)
 
 class LabelSorter:
     def __init__(self, pdf_path):
@@ -23,7 +25,8 @@ class LabelSorter:
                     page_text = page.extract_text(); page_tables = page.extract_tables()
                     
                     # Shopify Initializations
-                    if re.findall(ShopifyLabel.order_id_pattern, page_text):
+                    sh = ShopifyLabel()
+                    if re.findall(sh.order_id_pattern, page_text):
                         shopify_order_id_count += 1
                     elif re.findall(AmazonLabel.order_id_pattern, page_text):
                         amazon_order_id_count += 1
@@ -42,19 +45,25 @@ class LabelSorter:
             return platform
         
     def sort_label(self):
-        if not self.platform(pdf_path=self.label_filepath):
+        if not self.platform:
             sys.exit("Unsupported Platform, exiting....")
+        page_debrief = None
         try:
+            print(f"Platform : {self.platform}")
             with pdfplumber.open(self.label_filepath) as pdf_file:
                 for page_index, page in enumerate(pdf_file.pages):
                     page_text = page.extract_text(); page_tables = page.extract_tables()
                     page_number = page_index+1
                     
+                    print(f"{page_number}")
                     if self.platform == "Shopify":
                         #print(page_text,end="\n"+"-"*20+"\n")
                         inst = ShopifyLabel()
-                        inst.sort_label(page_text=page_text,page_num=page_number)
-            
+                        page_debrief = inst.analyze_page(label_text=page_text, page_num=page_number)
+                        
+                    print(page_debrief)
+        except FileNotFoundError as fe:
+            print(fe)
         except Exception as e:
             print(e)
         else:
