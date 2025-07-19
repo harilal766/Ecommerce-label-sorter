@@ -1,24 +1,16 @@
 import re
-from regex_patterns import *
-import pdfplumber
-from sorting_alrogithms.shopify import Shopify
 
-class Sort:
-    def __init__(self,pdf_path,platform):
-        self.summary_dict = {}
-        self.input_filepath = pdf_path
-        self.platform = platform
-        
+class AmazonLabel:
+    order_id_pattern = r'\d{3}-\d{7}-\d{7}'
+    product_name_pattern = r'\|\s[A-Z\d]+\s\(\s[A-Z\d-]+\s\)(\s|\n)Shipping Charges'
     
-        
-
     def sort_amazon_label(
         self,status:str,summary_dict: dict,
         page_text,page_tables, page_num:int) -> None:
         sorting_key = None
         try:
             # start of amazon function in the future
-            order_id_match = re.findall(amazon_order_id_pattern,page_text)
+            order_id_match = re.findall(self.order_id_pattern,page_text)
             # Ensuring invoice pages
             if order_id_match:
                 status += "Invoice page, "
@@ -57,8 +49,3 @@ class Sort:
             print(status, end = ", " if "Qr code page" in status else None)
         except Exception as e:
             print(e)
-            
-    
-            
-            
-    

@@ -1,14 +1,15 @@
 import re
 
 class ShopifyLabel:
-    order_id_pattern = r'#\d{4,5}'
+    order_id_pattern = r'(Order)\s(#\d{4,5})'
+    product_name_pattern = r'ITEMS QUANTITY\n(.*)\nThank you for shopping with us'
     
     def sort_label(self, page_text, page_num):
         try:
             #print(page_text)
             id_match = re.findall(r'(Order)\s(#\d{4,5})', page_text)
             
-            prod_desc_match = re.findall(r'ITEMS QUANTITY\n(.*)\nThank you for shopping with us', page_text,flags=re.DOTALL)
+            prod_desc_match = re.findall(self.product_name_pattern, page_text,flags=re.DOTALL)
             if id_match:
                 order_id = id_match[0][-1]
             

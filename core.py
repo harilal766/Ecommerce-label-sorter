@@ -1,12 +1,42 @@
 import pdfplumber, re, os
-from platform_detector import find_platform
 from pypdf import PdfReader, PdfWriter
 
+from platforms.ecommerce.shopify import ShopifyLabel
+from platforms.ecommerce.amazon import AmazonLabel
+
 class LabelSorter:
-    def __init__(self, pdf_path):
+    def __init__(self):
         self.sorted_dict = {}
-        self.input_pdf_path = pdf_path
-        self.platform = find_platform(pdf_path=pdf_path)
+        
+    def find_platform(pdf_path : str) -> str:
+        platform = None
+        try:
+            with pdfplumber.open(pdf_path) as pdf_file:
+                total_pages = 0; amazon_count = 0 
+                
+                shopify_order_id_count, amazon_order_id_count = 0, 0
+                
+                for page_index, page in enumerate(pdf_file.pages):
+                    total_pages += 1
+                    page_text = page.extract_text(); page_tables = page.extract_tables()
+                    
+                    # Shopify Initializations
+                    if re.findall(ShopifyLabel.order_id_pattern, page_text):
+                        shopify_order_id_count += 1
+                    elif re.findall(AmazonLabel.order_id_pattern, page_text):
+                        amazon_order_id_count += 1
+                        
+                    
+                if total_pages == shopify_order_id_count:
+                    platform = "Shopify"
+                # this condition is not complete, need to add overlap page detection
+                elif total_pages/2 == amazon_order_id_count:
+                    platform == "Amazon"
+            
+        except Exception as e:
+            print(e)
+        else:
+            return platform
         
     def get_filepath() -> str:
         while True:
