@@ -19,27 +19,26 @@ def find_platform(pdf_path : str) -> str:
         with pdfplumber.open(pdf_path) as pdf_file:
             total_pages = 0; amazon_count = 0 
             
-            shopify_order_id_count = 0
+            shopify_order_id_count, amazon_order_id_count = 0, 0
+            
             for page_index, page in enumerate(pdf_file.pages):
                 total_pages += 1
                 page_text = page.extract_text(); page_tables = page.extract_tables()
                 
                 # Shopify Initializations
-                shopify_order_id_match = re.findall(ShopifyLabel.order_id_pattern)
-                if shopify_order_id_match:
+                if re.findall(ShopifyLabel.order_id_pattern, page_text):
                     shopify_order_id_count += 1
+                elif re.findall(AmazonLabel.order_id_pattern, page_text):
+                    amazon_order_id_count += 1
+                    
                 
-                
-                print(shopify_order_id_match)
+            if total_pages == shopify_order_id_count:
+                platform = "Shopify"
+            # this condition is not complete, need to add overlap page detection
+            elif total_pages/2 == amazon_order_id_count:
+                platform == "Amazon"
         
-        return shopify_order_id_count
-                
-                
-                
-                
-                
     except Exception as e:
         print(e)
     else:
-        
         return platform
