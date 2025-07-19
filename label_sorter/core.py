@@ -1,14 +1,14 @@
 import pdfplumber, re, os
 from pypdf import PdfReader, PdfWriter
 
-from platforms.ecommerce.shopify import ShopifyLabel
-from platforms.ecommerce.amazon import AmazonLabel
+from label_sorter.platforms.ecommerce.shopify import ShopifyLabel
+from label_sorter.platforms.ecommerce.amazon import AmazonLabel
 
 class LabelSorter:
     def __init__(self):
         self.sorted_dict = {}
         
-    def find_platform(pdf_path : str) -> str:
+    def find_platform(self,pdf_path : str) -> str:
         platform = None
         try:
             with pdfplumber.open(pdf_path) as pdf_file:
