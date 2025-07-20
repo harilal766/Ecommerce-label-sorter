@@ -7,6 +7,6 @@ from tests.filepaths import *
 label_inst = LabelSorter(pdf_path=amazon_pdf)
 
 
-print(label_inst.find_platform())
+print(label_inst.sort_label())
 
 

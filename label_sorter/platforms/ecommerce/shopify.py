@@ -2,8 +2,8 @@ import re
 from .base_label import BaseLabel
 
 class ShopifyLabel(BaseLabel):
-    def __init__(self, page_text, page_table):
-        super().__init__(page_text, page_table)
+    def __init__(self, page_text, page_table,page_num):
+        super().__init__(page_text, page_table,page_num)
         self.shopify_order_id_pattern = r'#\d{4,5}'
         self.product_name_pattern = r'ITEMS QUANTITY\n(.*)\nThank you for shopping with us'
         self.qty_pattern = r'(\d+)\sof\s\d+'
@@ -15,7 +15,7 @@ class ShopifyLabel(BaseLabel):
         }
         """
     
-    def analyze_shopify_page(self, page_num):
+    def analyze_shpy_page(self):
         try:
             #print(page_text)
             id_match = re.findall(self.shopify_order_id_pattern, self.page_text)
@@ -36,10 +36,8 @@ class ShopifyLabel(BaseLabel):
                     self.page_debrief_dict["sorting_key"] = re.sub(self.qty_pattern,'',prod_desc_str)
                 else:
                     self.page_debrief_dict["sorting_key"] = "Mixed"
-                    
-                return self.page_debrief_dict
         except Exception as e:
             print(e)
         else:
-            pass
+            return self.page_debrief_dict
     

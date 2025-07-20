@@ -26,8 +26,8 @@ class LabelSorter:
                     page_text = page.extract_text(); page_tables = page.extract_tables()
                     
                     # Shopify Initializations
-                    sh = ShopifyLabel(page_text=page_text, page_table=page_tables)
-                    am = AmazonLabel(page_text=page_text, page_table=page_tables)
+                    sh = ShopifyLabel(page_text=page_text, page_table=page_tables,page_num=0)
+                    am = AmazonLabel(page_text=page_text, page_table=page_tables,page_num=0)
                     
                     if re.findall(sh.shopify_order_id_pattern, page_text):
                         shopify_order_id_count += 1
@@ -58,22 +58,23 @@ class LabelSorter:
                     page_text = page.extract_text(); page_table = page.extract_tables()
                     page_number = page_index+1
                     
-                    #print(f"{page_number}",end=" - ")
-                    if self.platform == "Shopify":
-                        #print(page_text,end="\n"+"-"*20+"\n")
-                        inst = ShopifyLabel(page_text=page_text, page_table=page_table)
-                        page_debrief = inst.analyze_shopify_page(page_num=page_number)
-                    elif self.platform == "Amazon":
-                        inst = AmazonLabel()
-                        page_debrief = inst.analyze_amazon_page()
-                        
+                    debriefs = {
+                        "Shopify" : ShopifyLabel(page_text=page_text, page_table=page_table,page_num=page_number).analyze_shpy_page(),
+                        "Amazon" : AmazonLabel(page_text=page_text, page_table=page_table,page_num=page_number).analyze_amzn_page(),
+                    }
+                    
+                    page_debrief = debriefs[self.platform]
+                    
+                    print(f"{page_number} : {page_debrief}")
+                    
+                    is_page_debrief_populated = None not in page_debrief.values()
                     # sorting summary
-                    if self.platform:
+                    if self.platform and is_page_debrief_populated:
                         self.populate_shipment_summary(
                             sorting_key=page_debrief["sorting_key"], qty=page_debrief["qty"],
                             page_nums=[page_number - 1, page_number] if self.platform == "Amazon" else [page_number]
                         )
-                    #print(page_debrief)
+                    
         except FileNotFoundError as fe:
             print(fe)
         except Exception as e:
