@@ -5,11 +5,13 @@ class ShopifyLabel:
         self.order_id_pattern = r'#\d{4,5}'
         self.product_name_pattern = r'ITEMS QUANTITY\n(.*)\nThank you for shopping with us'
         self.qty_pattern = r'(\d+)\sof\s\d+'
+        
+        # Common 
         self.page_debrief_dict = {
             "order_id" : None, "sorting_key" : None, "qty" : None
         }
     
-    def analyze_page(self, label_text, page_num):
+    def analyze_shopify_page(self, label_text, page_num):
         try:
             #print(page_text)
             id_match = re.findall(self.order_id_pattern, label_text)

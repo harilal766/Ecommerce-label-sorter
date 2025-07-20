@@ -60,7 +60,10 @@ class LabelSorter:
                     if self.platform == "Shopify":
                         #print(page_text,end="\n"+"-"*20+"\n")
                         inst = ShopifyLabel()
-                        page_debrief = inst.analyze_page(label_text=page_text, page_num=page_number)
+                        page_debrief = inst.analyze_shopify_page(label_text=page_text, page_num=page_number)
+                    elif self.platform == "Amazon":
+                        inst = AmazonLabel()
+                        page_debrief = inst.analyze_amazon_page()
                         
                     # sorting summary
                     if self.platform:

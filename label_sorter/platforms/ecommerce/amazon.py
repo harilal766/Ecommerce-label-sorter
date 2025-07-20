@@ -4,7 +4,15 @@ class AmazonLabel:
     order_id_pattern = r'\d{3}-\d{7}-\d{7}'
     product_name_pattern = r'\|\s[A-Z\d]+\s\(\s[A-Z\d-]+\s\)(\s|\n)Shipping Charges'
     
-    def sort_amazon_label(
+    def find_amazon_page_type(self):
+        try:
+            pass
+        except Exception as e:
+            print(e)
+        else:
+            pass
+    
+    def analyze_amazon_page(
         self,status:str,summary_dict: dict,
         page_text,page_tables, page_num:int) -> None:
         sorting_key = None
@@ -27,7 +35,7 @@ class AmazonLabel:
                     status += "Single item order."
                     product_description = products_rows[-1][1] 
                     product_name_match = re.sub(
-                        amazon_name_regex,"",product_description, flags = re.IGNORECASE
+                        self.product_name_pattern,"",product_description, flags = re.IGNORECASE
                     )
                     product_qty = products_rows[-1][3]
                     #sorting_key = f"{product_name_match.replace("\n"," ")} - {product_qty} qty"
