@@ -1,6 +1,6 @@
 import pdfplumber, re, os,sys, logging
 from pypdf import PdfReader, PdfWriter
-
+from pprint import pprint
 from label_sorter.platforms.ecommerce.shopify import ShopifyLabel
 from label_sorter.platforms.ecommerce.amazon import AmazonLabel
 
@@ -10,6 +10,7 @@ class LabelSorter:
     def __init__(self, pdf_path):
         self.sorted_dict = {}
         self.label_filepath = pdf_path
+        self.output_folder = self.label_filepath.replace(".pdf","")
         self.platform = self.find_platform(pdf_path=self.label_filepath)
         
     def find_platform(self,pdf_path : str) -> str:
@@ -55,7 +56,7 @@ class LabelSorter:
                     page_text = page.extract_text(); page_tables = page.extract_tables()
                     page_number = page_index+1
                     
-                    print(f"{page_number}",end=" - ")
+                    #print(f"{page_number}",end=" - ")
                     if self.platform == "Shopify":
                         #print(page_text,end="\n"+"-"*20+"\n")
                         inst = ShopifyLabel()
@@ -67,7 +68,7 @@ class LabelSorter:
                             sorting_key=page_debrief["sorting_key"], qty=page_debrief["qty"],
                             page_nums=[page_number - 1, page_number] if self.platform == "Amazon" else [page_number]
                         )
-                    print(page_debrief)
+                    #print(page_debrief)
         except FileNotFoundError as fe:
             print(fe)
         except Exception as e:
@@ -98,44 +99,49 @@ class LabelSorter:
             
     def create_sorted_pdf_files(self):
         summary_dict = self.sort_label()
+        
+        #pprint(summary_dict.keys())
+        
         if len(summary_dict.keys()) == 0:
             sys.exit("Cannot sort with empty summary...")
             
         order_count = None; page_numbers = None
-        output_directory = None; output_file = None 
+        output_file = None 
         
         # Create output folder
-        output_folder = self.label_filepath.replace(".pdf","")
             
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
-            print(f"Created output folder : {output_folder}")
+        if not os.path.exists(self.output_folder):
+            os.makedirs(self.output_folder)
+            print(f"Created output folder : {self.output_folder}")
             
         try:
-            reader = PdfReader(self.label_filepath); writer = PdfWriter()
+            print(f"Sorted Summary :")
             for sorting_key, value in summary_dict.items():
-                # Assingning output file name and its pages according to order type
+                # Assigning output file name and its pages according to order type
                 # Mixed orders
                 if type(value) == list:
-                    output_file = sorting_key
-                    page_numbers = value
+                    self.create_pdf(pdf_name=sorting_key, page_numbers=value)
                 # single item orders
                 elif type(value) == dict:
                     for qty,page_list in value.items():
-                        output_file = f"{sorting_key} - {qty}"
-                        page_numbers = page_list
-                        
-                """
-                # adding pages to the writer
-                for page in page_numbers:
-                    writer.add_page(reader.pages[page-1])
-                
-                page_count = len(page_numbers)
-                order_count = int(page_count/2) if self.platform == "Amazon" else page_count
-                
-                sorted_pdf_file = f"{output_file} - {order_count} order{"s" if order_count > 1 else ""}.pdf"
-                        
-                print(output_folder, sorted_pdf_file)
-                """
+                        self.create_pdf(pdf_name=f"{sorting_key} - {qty}", page_numbers=page_list)
         except Exception as e:
             print(e)
+    
+    def create_pdf(self, pdf_name, page_numbers):
+        try:
+            reader = PdfReader(self.label_filepath); writer = PdfWriter()
+            print(pdf_name, page_numbers)
+            # adding pages to the writer
+            for page in page_numbers:
+                writer.add_page(reader.pages[page-1])
+            page_count = len(page_numbers)
+            order_count = int(page_count/2) if self.platform == "Amazon" else page_count
+            sorted_pdf_file = f"{pdf_name} - {order_count} order{"s" if order_count > 1 else ""}.pdf"
+        except Exception as e:
+            print(e)
+        else:
+            if writer:
+                with open(os.path.join(self.output_folder, sorted_pdf_file), "wb") as out_pdf:
+                    writer.write(out_pdf)
+        
