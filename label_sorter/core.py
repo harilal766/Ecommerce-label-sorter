@@ -97,6 +97,23 @@ class LabelSorter:
         except Exception as e:
             print(e)
             
+    def create_pdf(self, pdf_name, page_numbers):
+        try:
+            reader = PdfReader(self.label_filepath); writer = PdfWriter()
+            print(pdf_name, page_numbers)
+            # adding pages to the writer
+            for page in page_numbers:
+                writer.add_page(reader.pages[page-1])
+            page_count = len(page_numbers)
+            order_count = int(page_count/2) if self.platform == "Amazon" else page_count
+            sorted_pdf_file = f"{pdf_name} - {order_count} order{"s" if order_count > 1 else ""}.pdf"
+        except Exception as e:
+            print(e)
+        else:
+            if writer:
+                with open(os.path.join(self.output_folder, sorted_pdf_file), "wb") as out_pdf:
+                    writer.write(out_pdf)        
+            
     def create_sorted_pdf_files(self):
         summary_dict = self.sort_label()
         
@@ -128,20 +145,5 @@ class LabelSorter:
         except Exception as e:
             print(e)
     
-    def create_pdf(self, pdf_name, page_numbers):
-        try:
-            reader = PdfReader(self.label_filepath); writer = PdfWriter()
-            print(pdf_name, page_numbers)
-            # adding pages to the writer
-            for page in page_numbers:
-                writer.add_page(reader.pages[page-1])
-            page_count = len(page_numbers)
-            order_count = int(page_count/2) if self.platform == "Amazon" else page_count
-            sorted_pdf_file = f"{pdf_name} - {order_count} order{"s" if order_count > 1 else ""}.pdf"
-        except Exception as e:
-            print(e)
-        else:
-            if writer:
-                with open(os.path.join(self.output_folder, sorted_pdf_file), "wb") as out_pdf:
-                    writer.write(out_pdf)
+
         
