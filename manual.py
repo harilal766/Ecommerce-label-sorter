@@ -5,4 +5,4 @@ from tests.filepaths import *
 label_inst = LabelSorter(pdf_path=shopify_pdf)
 
 
-label_inst.sort_label()
+label_inst.create_sorted_pdf_files()

@@ -55,12 +55,18 @@ class LabelSorter:
                     page_text = page.extract_text(); page_tables = page.extract_tables()
                     page_number = page_index+1
                     
-                    print(f"{page_number}")
+                    print(f"{page_number}",end=" - ")
                     if self.platform == "Shopify":
                         #print(page_text,end="\n"+"-"*20+"\n")
                         inst = ShopifyLabel()
                         page_debrief = inst.analyze_page(label_text=page_text, page_num=page_number)
                         
+                    # sorting summary
+                    if self.platform:
+                        self.populate_shipment_summary(
+                            sorting_key=page_debrief["sorting_key"], qty=page_debrief["qty"],
+                            page_nums=[page_number - 1, page_number] if self.platform == "Amazon" else [page_number]
+                        )
                     print(page_debrief)
         except FileNotFoundError as fe:
             print(fe)
@@ -69,62 +75,67 @@ class LabelSorter:
         else:
             return self.sorted_dict
         
-    def create_pdf(input_pdf_dir: str, sorted_page_nums: list, out_file:str, output_directory:str) -> None:
-        try:
-            # verify the pdf file exists
-            # Verify the page contains something
-            if len(sorted_page_nums) > 0:
-                # Init
-                reader = PdfReader(input_pdf_dir); writer = PdfWriter()
-                
-                for page in sorted_page_nums:
-                    writer.add_page(reader.pages[page-1])
-                
-                order_count = int(len(sorted_page_nums)/2)
-                # Sanitizing out file name
-                out_file = re.sub(r'\|',",",out_file)
-                #print(out_file)
-                
-                output_directory = os.path.join(
-                    output_directory, f"{out_file.replace("/"," ")} - {order_count} Order{"s" if order_count > 1 else ""}.pdf"
-                )
-                #print(output_directory)
-                if output_directory:
-                    with open(output_directory,"wb") as output_pdf:
-                        writer.write(output_pdf)
-            else:
-                sys.exit("Enter page nums")
-        except FileNotFoundError as e:
-            print("File location issues :\n", e)
-        """
-        except Exception as e:
-            print(e)
-        """
-        
-    def create_shipment_summary(self, sorting_key:str, summary_dict, page_nums:list, qty : str) -> None:
+    def populate_shipment_summary(self, sorting_key:str, page_nums:list, qty : str) -> None:
         try:
             # different conditions for mixed and single items
             # sorting key initialization
-            # The line `if sorti` is incomplete and does not exist in the provided code snippet. It
-            # seems like there might have been a typo or an incomplete statement. If you can provide
-            # more context or clarify the specific line of code you are referring to, I would be
-            # happy to help explain it.
             
             numbers_list = None
             # Adding sorting key if not present
-            if sorting_key not in summary_dict.keys(): 
-                summary_dict[sorting_key] = [] if sorting_key == "Mixed" else {}
+            if sorting_key not in self.sorted_dict.keys(): 
+                self.sorted_dict[sorting_key] = [] if sorting_key == "Mixed" else {}
 
             if sorting_key == "Mixed":
-                numbers_list = summary_dict[sorting_key]
+                numbers_list = self.sorted_dict[sorting_key]
             else:
-                if qty not in summary_dict[sorting_key].keys():
-                    summary_dict[sorting_key][qty] = []
-                numbers_list = summary_dict[sorting_key][qty]
+                if qty not in self.sorted_dict[sorting_key].keys():
+                    self.sorted_dict[sorting_key][qty] = []
+                numbers_list = self.sorted_dict[sorting_key][qty]
             numbers_list += page_nums
             
         except Exception as e:
             print(e)
             
-    def create_sorted_pdf_files():
-        pass
+    def create_sorted_pdf_files(self):
+        summary_dict = self.sort_label()
+        if len(summary_dict.keys()) == 0:
+            sys.exit("Cannot sort with empty summary...")
+            
+        order_count = None; page_numbers = None
+        output_directory = None; output_file = None 
+        
+        # Create output folder
+        output_folder = self.label_filepath.replace(".pdf","")
+            
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+            print(f"Created output folder : {output_folder}")
+            
+        try:
+            reader = PdfReader(self.label_filepath); writer = PdfWriter()
+            for sorting_key, value in summary_dict.items():
+                # Assingning output file name and its pages according to order type
+                # Mixed orders
+                if type(value) == list:
+                    output_file = sorting_key
+                    page_numbers = value
+                # single item orders
+                elif type(value) == dict:
+                    for qty,page_list in value.items():
+                        output_file = f"{sorting_key} - {qty}"
+                        page_numbers = page_list
+                        
+                """
+                # adding pages to the writer
+                for page in page_numbers:
+                    writer.add_page(reader.pages[page-1])
+                
+                page_count = len(page_numbers)
+                order_count = int(page_count/2) if self.platform == "Amazon" else page_count
+                
+                sorted_pdf_file = f"{output_file} - {order_count} order{"s" if order_count > 1 else ""}.pdf"
+                        
+                print(output_folder, sorted_pdf_file)
+                """
+        except Exception as e:
+            print(e)

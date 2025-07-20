@@ -23,7 +23,7 @@ class Test_LabelSorter:
     def test_sort_label(self):
         shpy_inst = LabelSorter(pdf_path=shopify_pdf)
         
-        assert shpy_inst.sort_label() == dict
+        assert type(shpy_inst.sort_label()) == dict
         
         
         
