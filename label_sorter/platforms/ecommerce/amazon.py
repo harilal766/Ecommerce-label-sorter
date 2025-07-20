@@ -12,15 +12,13 @@ class AmazonLabel(BaseLabel):
     def find_amazon_page_type(self):
         type = None
         try:
-            order_id_match = re.findall(self.amazon_order_id_pattern,self.page_text)
-            if order_id_match:
+            if re.findall(self.amazon_order_id_pattern,self.page_text):
                 type = "Invoice"
             else:
                 if re.findall(r'^Tax Invoice/Bill of Supply/Cash Memo',self.page_text):
                     type = "Overlap"
                 else:
                     type = "Shipping Label"
-            
         except Exception as e:
             print(e)
         else:
@@ -32,10 +30,8 @@ class AmazonLabel(BaseLabel):
         sorting_key = None
         try:
             # start of amazon function in the future
-            order_id_match = re.findall(self.amazon_order_id_pattern,page_text)
             # Ensuring invoice pages
-            if order_id_match:
-                status += "Invoice page, "
+            if self.find_amazon_page_type() == "Invoice":
                 products_table = page_tables[0]
                 products_rows = products_table[:-3]
                                     
@@ -55,19 +51,5 @@ class AmazonLabel(BaseLabel):
                     #sorting_key = f"{product_name_match.replace("\n"," ")} - {product_qty} qty"
                     sorting_key = product_name_match.replace("\n"," ")
                         
-                # populating summary dict based on the order condition
-                self.create_shipment_summary(
-                    sorting_key = sorting_key, summary_dict = summary_dict, 
-                    page_nums = [page_num-1, page_num], qty = product_qty
-                )
-                
-            # Handling QR code and Overlapping page
-            else:
-                if re.findall(r'^Tax Invoice/Bill of Supply/Cash Memo',page_text):
-                    status += "Overlapping page."
-                else:
-                    status += "Qr code page"
-                            
-            print(status, end = ", " if "Qr code page" in status else None)
         except Exception as e:
             print(e)

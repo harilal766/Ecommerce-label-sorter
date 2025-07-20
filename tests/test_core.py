@@ -6,25 +6,18 @@ from filepaths import amazon_pdf, shopify_pdf
 from label_sorter.core import LabelSorter
 
 class Test_LabelSorter:
+    label_inst = LabelSorter(pdf_path=shopify_pdf)
+    
+    files = {
+        "Shopify" : shopify_pdf,
+        "Amazon" : amazon_pdf
+    }
+    
     def test_find_platfrom(self):
-        files = {
-            "Shopify" : shopify_pdf,
-            "Amazon" : amazon_pdf
-        }
-        
-        for key,value in files.items():
+        for key,value in self.files.items():
             inst = LabelSorter(pdf_path=value)
             assert inst.find_platform() == key
         
-        """
-        with pytest.raises(FileNotFoundError):
-            self.inst.find_platform(pdf_path=shopify_pdf.replace(".pdf",".py"))
-        """
-        
     def test_sort_label(self):
-        shpy_inst = LabelSorter(pdf_path=shopify_pdf)
-        
-        assert type(shpy_inst.sort_label()) == dict
-        
-        
-        
+        assert len(self.label_inst.sort_label().keys()) > 0
+
