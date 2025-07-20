@@ -26,7 +26,7 @@ class LabelSorter:
                     page_text = page.extract_text(); page_tables = page.extract_tables()
                     
                     # Shopify Initializations
-                    sh = ShopifyLabel()
+                    sh = ShopifyLabel(page_text=page_text, page_table=page_tables)
                     if re.findall(sh.order_id_pattern, page_text):
                         shopify_order_id_count += 1
                     elif re.findall(AmazonLabel.order_id_pattern, page_text):
@@ -53,14 +53,14 @@ class LabelSorter:
             print(f"Platform : {self.platform}")
             with pdfplumber.open(self.label_filepath) as pdf_file:
                 for page_index, page in enumerate(pdf_file.pages):
-                    page_text = page.extract_text(); page_tables = page.extract_tables()
+                    page_text = page.extract_text(); page_table = page.extract_tables()
                     page_number = page_index+1
                     
                     #print(f"{page_number}",end=" - ")
                     if self.platform == "Shopify":
                         #print(page_text,end="\n"+"-"*20+"\n")
-                        inst = ShopifyLabel()
-                        page_debrief = inst.analyze_shopify_page(label_text=page_text, page_num=page_number)
+                        inst = ShopifyLabel(page_text=page_text, page_table=page_table)
+                        page_debrief = inst.analyze_shopify_page(page_num=page_number)
                     elif self.platform == "Amazon":
                         inst = AmazonLabel()
                         page_debrief = inst.analyze_amazon_page()

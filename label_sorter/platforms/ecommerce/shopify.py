@@ -1,22 +1,26 @@
 import re
+from .base_label import BaseLabel
 
-class ShopifyLabel:
-    def __init__(self):
+class ShopifyLabel(BaseLabel):
+    def __init__(self, page_text, page_table):
+        super().__init__(page_text, page_table)
         self.order_id_pattern = r'#\d{4,5}'
         self.product_name_pattern = r'ITEMS QUANTITY\n(.*)\nThank you for shopping with us'
         self.qty_pattern = r'(\d+)\sof\s\d+'
         
+        """
         # Common 
         self.page_debrief_dict = {
             "order_id" : None, "sorting_key" : None, "qty" : None
         }
+        """
     
-    def analyze_shopify_page(self, label_text, page_num):
+    def analyze_shopify_page(self, page_num):
         try:
             #print(page_text)
-            id_match = re.findall(self.order_id_pattern, label_text)
+            id_match = re.findall(self.order_id_pattern, self.page_text)
             
-            prod_desc_match = re.findall(self.product_name_pattern, label_text,flags=re.DOTALL)
+            prod_desc_match = re.findall(self.product_name_pattern, self.page_text,flags=re.DOTALL)
             if id_match:
                 self.page_debrief_dict["order_id"] = id_match[0]
             
