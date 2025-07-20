@@ -4,7 +4,7 @@ from .base_label import BaseLabel
 class ShopifyLabel(BaseLabel):
     def __init__(self, page_text, page_table):
         super().__init__(page_text, page_table)
-        self.order_id_pattern = r'#\d{4,5}'
+        self.shopify_order_id_pattern = r'#\d{4,5}'
         self.product_name_pattern = r'ITEMS QUANTITY\n(.*)\nThank you for shopping with us'
         self.qty_pattern = r'(\d+)\sof\s\d+'
         
@@ -18,7 +18,7 @@ class ShopifyLabel(BaseLabel):
     def analyze_shopify_page(self, page_num):
         try:
             #print(page_text)
-            id_match = re.findall(self.order_id_pattern, self.page_text)
+            id_match = re.findall(self.shopify_order_id_pattern, self.page_text)
             
             prod_desc_match = re.findall(self.product_name_pattern, self.page_text,flags=re.DOTALL)
             if id_match:

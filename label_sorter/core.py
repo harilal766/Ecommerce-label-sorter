@@ -11,12 +11,12 @@ class LabelSorter:
         self.sorted_dict = {}
         self.label_filepath = pdf_path
         self.output_folder = self.label_filepath.replace(".pdf","")
-        self.platform = self.find_platform(pdf_path=self.label_filepath)
+        self.platform = self.find_platform()
         
-    def find_platform(self,pdf_path : str) -> str:
+    def find_platform(self) -> str:
         platform = None
         try:
-            with pdfplumber.open(pdf_path) as pdf_file:
+            with pdfplumber.open(self.label_filepath) as pdf_file:
                 total_pages = 0; amazon_count = 0 
                 
                 shopify_order_id_count, amazon_order_id_count = 0, 0
@@ -27,19 +27,21 @@ class LabelSorter:
                     
                     # Shopify Initializations
                     sh = ShopifyLabel(page_text=page_text, page_table=page_tables)
-                    if re.findall(sh.order_id_pattern, page_text):
+                    am = AmazonLabel(page_text=page_text, page_table=page_tables)
+                    
+                    if re.findall(sh.shopify_order_id_pattern, page_text):
                         shopify_order_id_count += 1
-                    elif re.findall(AmazonLabel.order_id_pattern, page_text):
+                    elif re.findall(am.amazon_order_id_pattern, page_text):
                         amazon_order_id_count += 1
                         
                 if total_pages == shopify_order_id_count:
                     platform = "Shopify"
                 # this condition is not complete, need to add overlap page detection
-                elif total_pages/2 == amazon_order_id_count:
-                    platform == "Amazon"
+                elif amazon_order_id_count > 0:
+                    platform = "Amazon"
             
         except FileNotFoundError:
-            print(f"The file {pdf_path} does not exist.")
+            print(f"The file {self.label_filepath} does not exist.")
         except Exception as e:
             print(e)
         else:

@@ -8,12 +8,13 @@ from label_sorter.core import LabelSorter
 class Test_LabelSorter:
     def test_find_platfrom(self):
         files = {
-            "Shopify" : shopify_pdf
+            "Shopify" : shopify_pdf,
+            "Amazon" : amazon_pdf
         }
         
         for key,value in files.items():
             inst = LabelSorter(pdf_path=value)
-            assert inst.find_platform(pdf_path=value) == key
+            assert inst.find_platform() == key
         
         """
         with pytest.raises(FileNotFoundError):

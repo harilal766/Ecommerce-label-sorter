@@ -1,16 +1,30 @@
 import re
+from .base_label import BaseLabel
 
-class AmazonLabel:
-    order_id_pattern = r'\d{3}-\d{7}-\d{7}'
-    product_name_pattern = r'\|\s[A-Z\d]+\s\(\s[A-Z\d-]+\s\)(\s|\n)Shipping Charges'
+
+
+class AmazonLabel(BaseLabel):
+    def __init__(self, page_text, page_table):
+        super().__init__(page_text, page_table)
+        self.amazon_order_id_pattern = r'\d{3}-\d{7}-\d{7}'
+        self.amazon_product_name_pattern = r'\|\s[A-Z\d]+\s\(\s[A-Z\d-]+\s\)(\s|\n)Shipping Charges'
     
     def find_amazon_page_type(self):
+        type = None
         try:
-            pass
+            order_id_match = re.findall(self.amazon_order_id_pattern,self.page_text)
+            if order_id_match:
+                type = "Invoice"
+            else:
+                if re.findall(r'^Tax Invoice/Bill of Supply/Cash Memo',self.page_text):
+                    type = "Overlap"
+                else:
+                    type = "Shipping Label"
+            
         except Exception as e:
             print(e)
         else:
-            pass
+            return type
     
     def analyze_amazon_page(
         self,status:str,summary_dict: dict,
@@ -18,7 +32,7 @@ class AmazonLabel:
         sorting_key = None
         try:
             # start of amazon function in the future
-            order_id_match = re.findall(self.order_id_pattern,page_text)
+            order_id_match = re.findall(self.amazon_order_id_pattern,page_text)
             # Ensuring invoice pages
             if order_id_match:
                 status += "Invoice page, "
@@ -35,7 +49,7 @@ class AmazonLabel:
                     status += "Single item order."
                     product_description = products_rows[-1][1] 
                     product_name_match = re.sub(
-                        self.product_name_pattern,"",product_description, flags = re.IGNORECASE
+                        self.amazon_product_name_pattern,"",product_description, flags = re.IGNORECASE
                     )
                     product_qty = products_rows[-1][3]
                     #sorting_key = f"{product_name_match.replace("\n"," ")} - {product_qty} qty"
