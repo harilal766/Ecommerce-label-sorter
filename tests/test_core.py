@@ -20,4 +20,7 @@ class Test_LabelSorter:
         
     def test_sort_label(self):
         assert len(self.label_inst.sort_labels().keys()) > 0
+        
+        
+    # need more tests for mixed orders and amazon qr page
 
