@@ -86,7 +86,6 @@ class LabelSorter:
         try:
             # different conditions for mixed and single items
             # sorting key initialization
-            
             numbers_list = None
             # Adding sorting key if not present
             if sorting_key not in self.sorted_dict.keys(): 
