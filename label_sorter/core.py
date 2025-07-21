@@ -47,7 +47,7 @@ class LabelSorter:
         else:
             return platform
         
-    def sort_label(self):
+    def sort_labels(self):
         if not self.platform:
             sys.exit("Unsupported Platform, exiting....")
         page_debrief = None
@@ -67,7 +67,7 @@ class LabelSorter:
                     
                     print(f"{page_number} : {page_debrief}")
                     
-                    is_page_debrief_populated = None not in page_debrief.values()
+                    is_page_debrief_populated = page_debrief["order_id"] != None
                     # sorting summary
                     if self.platform and is_page_debrief_populated:
                         self.populate_shipment_summary(
@@ -121,7 +121,7 @@ class LabelSorter:
                     writer.write(out_pdf)        
             
     def create_sorted_pdf_files(self):
-        summary_dict = self.sort_label()
+        summary_dict = self.sort_labels()
         
         #pprint(summary_dict.keys())
         

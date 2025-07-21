@@ -19,5 +19,5 @@ class Test_LabelSorter:
             assert inst.find_platform() == key
         
     def test_sort_label(self):
-        assert len(self.label_inst.sort_label().keys()) > 0
+        assert len(self.label_inst.sort_labels().keys()) > 0
 
