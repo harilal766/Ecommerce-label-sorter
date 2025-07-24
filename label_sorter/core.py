@@ -1,6 +1,7 @@
-import pdfplumber, re, os,sys, logging
+import pdfplumber, re, os,sys, logging, json
 from pypdf import PdfReader, PdfWriter
 from pprint import pprint
+from label_sorter.platforms.ecommerce.base_label import BaseLabel
 from label_sorter.platforms.ecommerce.shopify import ShopifyLabel
 from label_sorter.platforms.ecommerce.amazon import AmazonLabel
 
@@ -47,7 +48,7 @@ class LabelSorter:
         else:
             return platform
         
-    def sort_labels(self):
+    def create_sorted_summary(self):
         if not self.platform:
             sys.exit("Unsupported Platform, exiting....")
         page_debrief = None
@@ -58,6 +59,7 @@ class LabelSorter:
                     page_text = page.extract_text(); page_table = page.extract_tables()
                     page_number = page_index+1
                     
+                    #Label_instance = BaseLabel(page_text=page_text, page_table=page_table,page_num=page_number)
                     debriefs = {
                         "Shopify" : ShopifyLabel(page_text=page_text, page_table=page_table,page_num=page_number).analyze_shpy_page(),
                         "Amazon" : AmazonLabel(page_text=page_text, page_table=page_table,page_num=page_number).analyze_amzn_page(),
@@ -102,25 +104,29 @@ class LabelSorter:
         except Exception as e:
             print(e)
             
-    def create_pdf(self, pdf_name, page_numbers):
+    def create_single_pdf_file(self, pdf_name, page_numbers):
         try:
             reader = PdfReader(self.label_filepath); writer = PdfWriter()
             print(pdf_name, page_numbers)
             # adding pages to the writer
             for page in page_numbers:
                 writer.add_page(reader.pages[page-1])
+                
             page_count = len(page_numbers)
             order_count = int(page_count/2) if self.platform == "Amazon" else page_count
-            sorted_pdf_file = f"{re.sub(r"\|\.",r"",pdf_name)} - {order_count} order{"s" if order_count > 1 else ""}.pdf"
+            
+            sorted_pdf_file = f"{re.sub(r"[\|\.]*",r"",pdf_name)} - {order_count} order{"s" if order_count > 1 else ""}.pdf"
         except Exception as e:
             print(e)
         else:
             if writer:
-                with open(os.path.join(self.output_folder, sorted_pdf_file), "wb") as out_pdf:
-                    writer.write(out_pdf)        
+                if sorted_pdf_file:
+                    out_filepath = os.path.join(self.output_folder, sorted_pdf_file)
+                    with open(out_filepath, "wb") as out_pdf:
+                        writer.write(out_pdf)        
             
     def create_sorted_pdf_files(self):
-        summary_dict = self.sort_labels()
+        summary_dict = self.create_sorted_summary()
         
         #pprint(summary_dict.keys())
         
@@ -130,11 +136,14 @@ class LabelSorter:
         order_count = None; page_numbers = None
         output_file = None 
         
-        # Create output folder
-            
+        # Create output folder if not created already.
         if not os.path.exists(self.output_folder):
             os.makedirs(self.output_folder)
             print(f"Created output folder : {self.output_folder}")
+        
+        # save the summary as a json file to the output folder
+        with open(f"{self.output_folder}/summary.json","w") as summary_json:
+            json.dump(summary_dict, summary_json)
             
         try:
             print(f"Sorted Summary :")
@@ -142,10 +151,12 @@ class LabelSorter:
                 # Assigning output file name and its pages according to order type
                 # Mixed orders
                 if type(value) == list:
-                    self.create_pdf(pdf_name=sorting_key, page_numbers=value)
+                    self.create_single_pdf_file(pdf_name=sorting_key, page_numbers=value)
                 # single item orders
                 elif type(value) == dict:
+                    #print(f"Writing Single item order",end=", ")
                     for qty,page_list in value.items():
-                        self.create_pdf(pdf_name=f"{sorting_key} - {qty}", page_numbers=page_list)
+                        #print(f"Detected more than one qty.")
+                        self.create_single_pdf_file(pdf_name=f"{sorting_key} - {qty}", page_numbers=page_list)
         except Exception as e:
-            print(e)
+            print(f"Err : {e}")
