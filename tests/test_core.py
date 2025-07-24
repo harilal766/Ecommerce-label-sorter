@@ -19,7 +19,7 @@ class Test_LabelSorter:
             assert inst.find_platform() == key
         
     def test_sort_label(self):
-        assert len(self.label_inst.create_sorted_dictionary().keys()) > 0
+        assert len(self.label_inst.create_sorted_summary().keys()) > 0
         
         
     # need more tests for mixed orders and amazon qr page

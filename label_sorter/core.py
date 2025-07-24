@@ -1,4 +1,4 @@
-import pdfplumber, re, os,sys, logging
+import pdfplumber, re, os,sys, logging, json
 from pypdf import PdfReader, PdfWriter
 from pprint import pprint
 from label_sorter.platforms.ecommerce.base_label import BaseLabel
@@ -48,7 +48,7 @@ class LabelSorter:
         else:
             return platform
         
-    def create_sorted_dictionary(self):
+    def create_sorted_summary(self):
         if not self.platform:
             sys.exit("Unsupported Platform, exiting....")
         page_debrief = None
@@ -126,7 +126,7 @@ class LabelSorter:
                         writer.write(out_pdf)        
             
     def create_sorted_pdf_files(self):
-        summary_dict = self.create_sorted_dictionary()
+        summary_dict = self.create_sorted_summary()
         
         #pprint(summary_dict.keys())
         
@@ -136,11 +136,14 @@ class LabelSorter:
         order_count = None; page_numbers = None
         output_file = None 
         
-        # Create output folder
-            
+        # Create output folder if not created already.
         if not os.path.exists(self.output_folder):
             os.makedirs(self.output_folder)
             print(f"Created output folder : {self.output_folder}")
+        
+        # save the summary as a json file to the output folder
+        with open(f"{self.output_folder}/summary.json","w") as summary_json:
+            json.dump(summary_dict, summary_json)
             
         try:
             print(f"Sorted Summary :")
