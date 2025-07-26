@@ -7,6 +7,6 @@ setup(
     packages=["label_sorter"],
     install_requires = [
         
-    ]
+    ],
     
 )
