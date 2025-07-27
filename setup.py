@@ -9,7 +9,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="label_sorter",
-    version="0.1",
+    version="0.2",
     packages = find_packages(),
     install_requires = required_dependencies,
     author = "Harry19967",
