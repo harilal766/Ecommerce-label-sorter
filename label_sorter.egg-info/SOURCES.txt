@@ -1,0 +1,17 @@
+LICENSE
+README.md
+setup.py
+label_sorter/__init__.py
+label_sorter/core.py
+label_sorter.egg-info/PKG-INFO
+label_sorter.egg-info/SOURCES.txt
+label_sorter.egg-info/dependency_links.txt
+label_sorter.egg-info/requires.txt
+label_sorter.egg-info/top_level.txt
+label_sorter/platforms/__init__.py
+label_sorter/platforms/ecommerce/__init__.py
+label_sorter/platforms/ecommerce/amazon.py
+label_sorter/platforms/ecommerce/base_label.py
+label_sorter/platforms/ecommerce/shopify.py
+tests/test_core.py
+tests/test_packaging.py

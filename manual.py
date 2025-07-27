@@ -1,10 +1,9 @@
-from Ecommerce_Label_Sorter import LabelSorter
-import re
+from label_sorter import LabelSorter
+from tests.filepaths import shopify_pdf, amazon_pdf
 
-pdf_input = str(input("Enter the pdf filepath : "))
-pdf_input = re.sub(r'\"|\"','',pdf_input)
-label_inst = LabelSorter(pdf_path=pdf_input)
 
-print(label_inst.create_sorted_pdf_files())
 
+
+ls = LabelSorter(pdf_path=shopify_pdf)
+print(ls.find_platform())
 
