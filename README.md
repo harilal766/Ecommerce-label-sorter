@@ -11,7 +11,7 @@ Manually sorting a large PDF containing multiple orders is time-consuming and pr
 
 # Installation
 ```
-pip install ecom_label_sorter
+pip install label_sorter
 ```
 
 # Usage
