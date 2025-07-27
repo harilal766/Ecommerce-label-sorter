@@ -1,8 +1,6 @@
 import re
 from .base_label import BaseLabel
 
-
-
 class AmazonLabel(BaseLabel):
     def __init__(self, page_text, page_table,page_num):
         super().__init__(page_text, page_table,page_num)

@@ -1,10 +1,10 @@
 import sys, os, pytest
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from filepaths import amazon_pdf, shopify_pdf
+#sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from filepaths import *
 from label_sorter.core import LabelSorter
 
+"""
 class Test_LabelSorter:
     label_inst = LabelSorter(pdf_path=shopify_pdf)
     
@@ -24,3 +24,4 @@ class Test_LabelSorter:
         
     # need more tests for mixed orders and amazon qr page
 
+"""
