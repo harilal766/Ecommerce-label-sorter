@@ -13,6 +13,3 @@ with open("creds.json","r") as json_file:
     shopify_pdf = os.path.join(test_label_dir, credentials["shopify"])
     
     
-with open("requirements.txt", "r") as req:
-    required_dependencies = [line.strip() for line in req.readlines()]
-    
