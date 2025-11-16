@@ -6,7 +6,6 @@
 3. Miscellaneous orders will be stored on a dedicated file named "Mixed".
 4. All of these files will be stored inside a folder which is named after the input pdf file.
 
-
 ## Installation
 ```
 pip install ecom_label_sorter
