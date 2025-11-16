@@ -1,4 +1,4 @@
-# Ecom-label-sorter
+# Ecommerce Label Sorter
 
 ## Description:
 1. A python program to sort Amazon and Shopify shipping labels based on the product name and quantity.
