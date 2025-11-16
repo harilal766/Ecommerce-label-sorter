@@ -7,12 +7,12 @@
 4. All of these files will be stored inside a folder which is named after the input pdf file.
 
 
-# Installation
+## Installation
 ```
 pip install ecom_label_sorter
 ```
 
-# Usage
+## Usage
 ```
 from label_sorter import Label_sorter
 
