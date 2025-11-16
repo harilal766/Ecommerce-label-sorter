@@ -115,7 +115,7 @@ class LabelSorter:
             page_count = len(page_numbers)
             order_count = int(page_count/2) if self.platform == "Amazon" else page_count
             
-            sorted_pdf_file = f"{re.sub(r"[\|\.]*",r"",pdf_name)} - {order_count} order{"s" if order_count > 1 else ""}.pdf"
+            sorted_pdf_file = f"{re.sub(r"[\|\.\/]*",r"",pdf_name)} - {order_count} order{"s" if order_count > 1 else ""}.pdf"
         except Exception as e:
             print(e)
         else:

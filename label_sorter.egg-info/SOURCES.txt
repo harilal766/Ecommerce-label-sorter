@@ -14,4 +14,3 @@ label_sorter/platforms/ecommerce/amazon.py
 label_sorter/platforms/ecommerce/base_label.py
 label_sorter/platforms/ecommerce/shopify.py
 tests/test_core.py
-tests/test_packaging.py

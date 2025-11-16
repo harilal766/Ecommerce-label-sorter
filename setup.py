@@ -1,17 +1,16 @@
 from setuptools import setup, find_packages
 from pathlib import Path
 
-from tests.filepaths import required_dependencies
 
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 
 
 setup(
-    name="label_sorter",
-    version="0.3",
+    name="ecom_label_sorter",
+    version="0.4",
     packages = find_packages(),
-    install_requires = required_dependencies,
+    install_requires = ['asarPy==1.0.1', 'blinker==1.9.0', 'build==1.2.2.post1', 'certifi==2025.7.14', 'cffi==1.17.1', 'charset-normalizer==3.4.2', 'click==8.2.1', 'cryptography==45.0.5', 'docutils==0.21.2', 'et_xmlfile==2.0.0', 'greenlet==3.2.3', 'id==1.5.0', 'idna==3.10', 'iniconfig==2.1.0', 'itsdangerous==2.2.0', 'jaraco.classes==3.4.0', 'jaraco.context==6.0.1', 'jaraco.functools==4.2.1', 'jeepney==0.9.0', 'keyring==25.6.0', 'markdown-it-py==3.0.0', 'MarkupSafe==3.0.2', 'mdurl==0.1.2', 'more-itertools==10.7.0', 'nh3==0.3.0', 'packaging==25.0', 'pdfminer.six==20250506', 'pdfplumber==0.11.7', 'pillow==11.3.0', 'pluggy==1.6.0', 'pycparser==2.22', 'Pygments==2.19.2', 'pypdf==5.8.0', 'PyPDF2==3.0.1', 'pypdfium2==4.30.1', 'pyproject_hooks==1.2.0', 'pytest==8.4.1', 'python-dateutil==2.9.0.post0', 'pytz==2025.2', 'readme_renderer==44.0', 'requests==2.32.4', 'requests-toolbelt==1.0.0', 'rfc3986==2.0.0', 'rich==14.1.0', 'SecretStorage==3.3.3', 'setuptools==80.9.0', 'six==1.17.0', 'termcolor==3.1.0', 'twine==6.1.0', 'typing_extensions==4.14.1', 'tzdata==2025.2', 'urllib3==2.5.0', 'Werkzeug==3.1.3', 'wheel==0.45.1'],
     author = "Harry19967",
     author_email="harilalsunil2@gmail.com",
     description = "Library to sort Amazon and Shopify shipping labels",
@@ -25,3 +24,5 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown'
 )
+
+
