@@ -10,14 +10,16 @@ logging.getLogger('pdfminer').setLevel(logging.ERROR)
 class LabelSorter:
     def __init__(self, pdf_path):
         self.sorted_dict = {}
-        self.label_filepath = pdf_path
-        self.output_folder = self.label_filepath.replace(".pdf","")
+        self.input_filepath = pdf_path
+        self.output_folder = self.input_filepath.replace(".pdf","")
         self.platform = self.find_platform()
         
     def find_platform(self) -> str:
         platform = None
+        if os.path.exists(self.input_filepath) == False:
+            sys.exit("Input file does not exist....")
         try:
-            with pdfplumber.open(self.label_filepath) as pdf_file:
+            with pdfplumber.open(self.input_filepath) as pdf_file:
                 total_pages = 0; amazon_count = 0 
                 
                 shopify_order_id_count, amazon_order_id_count = 0, 0
@@ -42,19 +44,17 @@ class LabelSorter:
                     platform = "Amazon"
             
         except FileNotFoundError:
-            print(f"The file {self.label_filepath} does not exist.")
+            print(f"The file {self.input_filepath} does not exist.")
         except Exception as e:
             print(e)
         else:
             return platform
         
     def create_sorted_summary(self):
-        if not self.platform:
-            sys.exit("Unsupported Platform, exiting....")
         page_debrief = None
         try:
             print(f"Platform : {self.platform}")
-            with pdfplumber.open(self.label_filepath) as pdf_file:
+            with pdfplumber.open(self.input_filepath) as pdf_file:
                 for page_index, page in enumerate(pdf_file.pages):
                     page_text = page.extract_text(); page_table = page.extract_tables()
                     page_number = page_index+1
@@ -106,7 +106,7 @@ class LabelSorter:
             
     def create_single_pdf_file(self, pdf_name, page_numbers):
         try:
-            reader = PdfReader(self.label_filepath); writer = PdfWriter()
+            reader = PdfReader(self.input_filepath); writer = PdfWriter()
             print(pdf_name, page_numbers)
             # adding pages to the writer
             for page in page_numbers:

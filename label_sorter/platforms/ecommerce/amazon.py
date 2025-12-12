@@ -35,6 +35,7 @@ class AmazonLabel(BaseLabel):
                 # Deciding order type by reading the product table and types of items
                 if len(products_rows) > 2:               
                     self.page_debrief_dict["sorting_key"] = "Mixed"
+                    print(products_rows)
                 else:
                     product_description = products_rows[-1][1] 
                     product_name_match = re.sub(
