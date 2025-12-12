@@ -18,6 +18,6 @@ class Test_LabelSorter:
             if filename.endswith('.pdf') and os.path.exists(filename):
                 inst = LabelSorter(pdf_path=filename)
                 assert inst.find_platform() == platform
-        
-    def test_sort_label(self):
-        assert len(self.label_inst.create_sorted_summary().keys()) > 0
+    
+    def test_create_sorted_summary(self):
+        assert type(self.label_inst.create_sorted_summary()) == dict

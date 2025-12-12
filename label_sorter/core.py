@@ -50,7 +50,7 @@ class LabelSorter:
             print(e)
         else:
             return platform
-        
+
     def create_sorted_summary(self):
         page_debrief = None
         try:
@@ -59,51 +59,45 @@ class LabelSorter:
                 for page_index, page in enumerate(pdf_file.pages):
                     page_text = page.extract_text(); page_table = page.extract_tables()
                     page_number = page_index+1
-                    
+                        
                     #Label_instance = BaseLabel(page_text=page_text, page_table=page_table,page_num=page_number)
                     debriefs = {
                         "Shopify" : ShopifyLabel(page_text=page_text, page_table=page_table,page_num=page_number).analyze_shpy_page(),
                         "Amazon" : AmazonLabel(page_text=page_text, page_table=page_table,page_num=page_number).analyze_amzn_page(),
                     }
-                    
-                    page_debrief = debriefs[self.platform]
-                    
+                        
+                    page_debrief = debriefs.get(self.platform)
+                        
                     print(f"{page_number} : {page_debrief}")
-                    
+                        
                     is_page_debrief_populated = page_debrief["order_id"] != None
                     # sorting summary
                     if self.platform and is_page_debrief_populated:
-                        self.populate_shipment_summary(
-                            sorting_key=page_debrief["sorting_key"], qty=page_debrief["qty"],
-                            page_nums=[page_number - 1, page_number] if self.platform == "Amazon" else [page_number]
-                        )
-                    
+                        # different conditions for mixed and single items
+                        # sorting key initialization
+                        numbers_list = None
+                        
+                        sorting_key = page_debrief.get("sorting_key"); qty = page_debrief.get("qty")
+                        page_nums=[page_number - 1, page_number] if self.platform == "Amazon" else [page_number]
+                        
+                        # Adding sorting key if not present
+                        if sorting_key not in self.sorted_dict.keys(): 
+                            self.sorted_dict[sorting_key] = {}
+
+                        if sorting_key == self.misc_filename:
+                            numbers_list = self.sorted_dict[sorting_key]["pages"]
+                        else:
+                            if qty not in self.sorted_dict[sorting_key].keys():
+                                self.sorted_dict[sorting_key][qty] = []
+                            numbers_list = self.sorted_dict[sorting_key][qty]
+                        numbers_list += page_nums
+                        
         except FileNotFoundError as fe:
             print(fe)
         except Exception as e:
             print(e)
         else:
             return self.sorted_dict
-        
-    def populate_shipment_summary(self, sorting_key:str, page_nums:list, qty : str) -> None:
-        try:
-            # different conditions for mixed and single items
-            # sorting key initialization
-            numbers_list = None
-            # Adding sorting key if not present
-            if sorting_key not in self.sorted_dict.keys(): 
-                self.sorted_dict[sorting_key] = [] if sorting_key == self.misc_filename else {}
-
-            if sorting_key == self.misc_filename:
-                numbers_list = self.sorted_dict[sorting_key]
-            else:
-                if qty not in self.sorted_dict[sorting_key].keys():
-                    self.sorted_dict[sorting_key][qty] = []
-                numbers_list = self.sorted_dict[sorting_key][qty]
-            numbers_list += page_nums
-            
-        except Exception as e:
-            print(e)
             
     def create_single_pdf_file(self, pdf_name, page_numbers):
         if page_numbers == None:
@@ -161,7 +155,7 @@ class LabelSorter:
                             self.create_single_pdf_file(pdf_name=f"{sorting_key} - {qty}", page_numbers=page_list)
                     else:
                         self.create_single_pdf_file(
-                            pdf_name = self.misc_filename, page_numbers= value.get("Pages",None)
+                            pdf_name = self.misc_filename, page_numbers= value.get("pages",None)
                         )
                 # Mixed orders which returns page numbers list
                 elif type(value) == list:
