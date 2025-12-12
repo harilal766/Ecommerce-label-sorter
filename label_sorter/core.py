@@ -9,7 +9,6 @@ logging.getLogger('pdfminer').setLevel(logging.ERROR)
 
 class LabelSorter:
     def __init__(self, pdf_path):
-        self.sorted_dict = {}
         self.input_filepath = pdf_path
         self.output_folder = self.input_filepath.replace(".pdf","")
         self.platform = self.find_platform()
@@ -52,24 +51,23 @@ class LabelSorter:
             return platform
 
     def create_sorted_summary(self):
-        page_debrief = None
+        page_debrief = None; sorted_dict = {}
         try:
             print(f"Platform : {self.platform}")
             with pdfplumber.open(self.input_filepath) as pdf_file:
                 for page_index, page in enumerate(pdf_file.pages):
                     page_text = page.extract_text(); page_table = page.extract_tables()
                     page_number = page_index+1
-                        
                     #Label_instance = BaseLabel(page_text=page_text, page_table=page_table,page_num=page_number)
                     debriefs = {
                         "Shopify" : ShopifyLabel(page_text=page_text, page_table=page_table,page_num=page_number).analyze_shpy_page(),
                         "Amazon" : AmazonLabel(page_text=page_text, page_table=page_table,page_num=page_number).analyze_amzn_page(),
                     }
-                        
-                    page_debrief = debriefs.get(self.platform)
-                        
-                    print(f"{page_number} : {page_debrief}")
-                        
+                    page_debrief = debriefs.get(self.platform,None)
+                    print(page_debrief)                    
+                    """
+                    print(f"{page_number} : {" ".join(page_debrief.values())}")
+
                     is_page_debrief_populated = page_debrief["order_id"] != None
                     # sorting summary
                     if self.platform and is_page_debrief_populated:
@@ -79,25 +77,26 @@ class LabelSorter:
                         
                         sorting_key = page_debrief.get("sorting_key"); qty = page_debrief.get("qty")
                         page_nums=[page_number - 1, page_number] if self.platform == "Amazon" else [page_number]
-                        
+                        print(page_debrief)
+                    
                         # Adding sorting key if not present
-                        if sorting_key not in self.sorted_dict.keys(): 
-                            self.sorted_dict[sorting_key] = {}
+                        if sorting_key not in sorted_dict.keys(): 
+                            sorted_dict[sorting_key] = {}
 
                         if sorting_key == self.misc_filename:
-                            numbers_list = self.sorted_dict[sorting_key]["pages"]
+                            numbers_list = sorted_dict[sorting_key]["pages"]
                         else:
                             if qty not in self.sorted_dict[sorting_key].keys():
-                                self.sorted_dict[sorting_key][qty] = []
-                            numbers_list = self.sorted_dict[sorting_key][qty]
+                                sorted_dict[sorting_key][qty] = []
+                            numbers_list = sorted_dict[sorting_key][qty]
                         numbers_list += page_nums
-                        
+                    """  
         except FileNotFoundError as fe:
             print(fe)
         except Exception as e:
             print(e)
         else:
-            return self.sorted_dict
+            return sorted_dict
             
     def create_single_pdf_file(self, pdf_name, page_numbers):
         if page_numbers == None:
