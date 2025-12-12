@@ -13,6 +13,7 @@ class LabelSorter:
         self.input_filepath = pdf_path
         self.output_folder = self.input_filepath.replace(".pdf","")
         self.platform = self.find_platform()
+        self.misc_filename = "Mixed"
         
     def find_platform(self) -> str:
         platform = None
@@ -91,9 +92,9 @@ class LabelSorter:
             numbers_list = None
             # Adding sorting key if not present
             if sorting_key not in self.sorted_dict.keys(): 
-                self.sorted_dict[sorting_key] = [] if sorting_key == "Mixed" else {}
+                self.sorted_dict[sorting_key] = [] if sorting_key == self.misc_filename else {}
 
-            if sorting_key == "Mixed":
+            if sorting_key == self.misc_filename:
                 numbers_list = self.sorted_dict[sorting_key]
             else:
                 if qty not in self.sorted_dict[sorting_key].keys():
@@ -105,6 +106,8 @@ class LabelSorter:
             print(e)
             
     def create_single_pdf_file(self, pdf_name, page_numbers):
+        if page_numbers == None:
+            sys.exit("Received Nonetype instead of page numbers")
         try:
             reader = PdfReader(self.input_filepath); writer = PdfWriter()
             print(pdf_name, page_numbers)
@@ -149,14 +152,20 @@ class LabelSorter:
             print(f"Sorted Summary :")
             for sorting_key, value in summary_dict.items():
                 # Assigning output file name and its pages according to order type
-                # Mixed orders
-                if type(value) == list:
-                    self.create_single_pdf_file(pdf_name=sorting_key, page_numbers=value)
                 # single item orders
-                elif type(value) == dict:
-                    #print(f"Writing Single item order",end=", ")
-                    for qty,page_list in value.items():
-                        #print(f"Detected more than one qty.")
-                        self.create_single_pdf_file(pdf_name=f"{sorting_key} - {qty}", page_numbers=page_list)
+                if type(value) == dict:
+                    if type(sorting_key) != self.misc_filename:
+                        #print(f"Writing Single item order",end=", ")
+                        for qty,page_list in value.items():
+                            #print(f"Detected more than one qty.")
+                            self.create_single_pdf_file(pdf_name=f"{sorting_key} - {qty}", page_numbers=page_list)
+                    else:
+                        self.create_single_pdf_file(
+                            pdf_name = self.misc_filename, page_numbers= value.get("Pages",None)
+                        )
+                # Mixed orders which returns page numbers list
+                elif type(value) == list:
+                    self.create_single_pdf_file(pdf_name=sorting_key, page_numbers=value)
+                
         except Exception as e:
             print(f"Err : {e}")
