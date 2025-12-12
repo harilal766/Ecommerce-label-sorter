@@ -6,3 +6,5 @@ __pycache__/
 test_labels/
 **/test_labels/
 creds.json
+manual.py
+label_sorter.json
