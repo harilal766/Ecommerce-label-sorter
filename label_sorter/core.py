@@ -53,13 +53,11 @@ class LabelSorter:
     def create_sorted_summary(self):
         page_debrief = None; sorted_dict = {}
         try:
-            pass
-            """
             with pdfplumber.open(self.input_filepath) as pdf_file:
                 for page_index, page in enumerate(pdf_file.pages):
                     page_text = page.extract_text(); page_table = page.extract_tables()
                     page_number = page_index+1
-                    #Label_instance = BaseLabel(page_text=page_text, page_table=page_table,page_num=page_number)
+                    """
                     debriefs = {
                         "Shopify" : ShopifyLabel(page_text=page_text, page_table=page_table,page_num=page_number).analyze_shpy_page(),
                         "Amazon" : AmazonLabel(page_text=page_text, page_table=page_table,page_num=page_number).analyze_amzn_page(),

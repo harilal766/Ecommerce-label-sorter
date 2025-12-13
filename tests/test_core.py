@@ -6,7 +6,7 @@ from label_sorter.core import LabelSorter
 
 
 class Test_LabelSorter:
-    label_inst = LabelSorter(pdf_path=shopify_pdf)
+    label_inst = LabelSorter(pdf_path=amazon_pdf)
     
     files = {
         "Shopify" : shopify_pdf,

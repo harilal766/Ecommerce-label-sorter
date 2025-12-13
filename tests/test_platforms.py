@@ -1,19 +1,17 @@
 from label_sorter.platforms.ecommerce.base_label import BaseLabel
 from label_sorter.platforms.ecommerce.amazon import AmazonLabel
+from tests.test_core import Test_LabelSorter
+from tests.filepaths import amazon_pdf
+
+import pdfplumber
 
 
-class TestBaseLabel:
-    base_label_inst = BaseLabel()
-    def test_page():
-        pass
-    
-    def get_pages_for_testing():
-        pass
 
-class TestAmazonLabel:
-    amazon_pages = 0
-    single_item_page = 0
-    mixed_items_page = 0
-    amzn_label_instance = AmazonLabel()
+class TestBaseLabel(Test_LabelSorter):
+    pass
 
-
+class TestAmazon(TestBaseLabel):
+    pdf = pdfplumber.open(amazon_pdf)
+    pages = pdf.pages
+    def test_pages(self):
+        assert type(self.pages) == list
