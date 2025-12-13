@@ -53,7 +53,8 @@ class LabelSorter:
     def create_sorted_summary(self):
         page_debrief = None; sorted_dict = {}
         try:
-            print(f"Platform : {self.platform}")
+            pass
+            """
             with pdfplumber.open(self.input_filepath) as pdf_file:
                 for page_index, page in enumerate(pdf_file.pages):
                     page_text = page.extract_text(); page_table = page.extract_tables()
@@ -65,9 +66,7 @@ class LabelSorter:
                     }
                     page_debrief = debriefs.get(self.platform,None)
                     print(page_debrief)                    
-                    """
-                    print(f"{page_number} : {" ".join(page_debrief.values())}")
-
+                    
                     is_page_debrief_populated = page_debrief["order_id"] != None
                     # sorting summary
                     if self.platform and is_page_debrief_populated:

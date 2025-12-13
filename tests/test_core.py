@@ -12,7 +12,6 @@ class Test_LabelSorter:
         "Shopify" : shopify_pdf,
         "Amazon" : amazon_pdf
     }
-    
     def test_find_platfrom(self):
         for platform,filename in self.files.items():
             if filename.endswith('.pdf') and os.path.exists(filename):
