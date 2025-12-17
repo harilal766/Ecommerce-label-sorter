@@ -13,5 +13,14 @@ class TestBaseLabel(Test_LabelSorter):
 class TestAmazon(TestBaseLabel):
     pdf = pdfplumber.open(amazon_pdf)
     pages = pdf.pages
+    
+    page = pages[33]
+    am_inst = AmazonLabel(
+        page_text= page.extract_text(), page_table=page.extract_table(),page_num=33
+    )
     def test_pages(self):
         assert type(self.pages) == list
+        assert self.pages[0]
+    
+    def test_analyze_amzn_page(self):
+        assert self.am_inst.analyze_amzn_page()

@@ -30,20 +30,28 @@ class AmazonLabel(BaseLabel):
             if self.find_amazon_page_type() == "Invoice":
                 self.page_debrief_dict["order_id"] = order_id_match[0]
                 
-                products_table = self.page_table[0]
-                products_rows = products_table[:-3]
+                product_table = self.page_table[0]
+                product_rows = product_table[1:-3]
+                print(product_rows)
+                for row in product_rows:
+                    prod_name = row[1]; qty = row[3]
+                    self.page_debrief_dict["items"].append(
+                        {"item_name" : prod_name, "qty" : qty}
+                    )
+                    
+                """
                 # Deciding order type by reading the product table and types of items
-                if len(products_rows) > 2:               
+                if len(product_rows) > 2:
+                    print(product_rows)
                     self.page_debrief_dict["sorting_key"] = "Mixed"
-                    print(products_rows)
                 else:
-                    product_description = products_rows[-1][1] 
+                    product_description = product_rows[-1][1] 
                     product_name_match = re.sub(
                         self.amazon_product_name_pattern,"",product_description, flags = re.IGNORECASE
                     )
-                    self.page_debrief_dict["qty"] = products_rows[-1][3]
+                    self.page_debrief_dict["qty"] = product_rows[-1][3]
                     self.page_debrief_dict["sorting_key"] = product_name_match.replace("\n"," ")
-                
+                """
         except Exception as e:
             print(e)
             
