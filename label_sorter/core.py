@@ -57,14 +57,15 @@ class LabelSorter:
                 for page_index, page in enumerate(pdf_file.pages):
                     page_text = page.extract_text(); page_table = page.extract_tables()
                     page_number = page_index+1
-                    """
+                    
                     debriefs = {
                         "Shopify" : ShopifyLabel(page_text=page_text, page_table=page_table,page_num=page_number).analyze_shpy_page(),
                         "Amazon" : AmazonLabel(page_text=page_text, page_table=page_table,page_num=page_number).analyze_amzn_page(),
                     }
-                    page_debrief = debriefs.get(self.platform,None)
-                    print(page_debrief)                    
                     
+                    page_debrief = debriefs.get(self.platform,None)                   
+                    print('*'*8)
+                    """
                     is_page_debrief_populated = page_debrief["order_id"] != None
                     # sorting summary
                     if self.platform and is_page_debrief_populated:

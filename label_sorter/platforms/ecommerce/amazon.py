@@ -32,13 +32,13 @@ class AmazonLabel(BaseLabel):
                 
                 product_table = self.page_table[0]
                 product_rows = product_table[1:-3]
-                print(product_rows)
                 for row in product_rows:
-                    prod_name = row[1]; qty = row[3]
-                    self.page_debrief_dict["items"].append(
-                        {"item_name" : prod_name, "qty" : qty}
-                    )
-                    
+                        prod_name = row[1].replace("\n",""); qty = row[3]
+                        page_dict = {"item_name" : prod_name, "qty" : qty}
+                        
+                        if page_dict["item_name"] != None:
+                            self.page_debrief_dict["items"].append(page_dict)
+                print(self.page_debrief_dict)
                 """
                 # Deciding order type by reading the product table and types of items
                 if len(product_rows) > 2:
