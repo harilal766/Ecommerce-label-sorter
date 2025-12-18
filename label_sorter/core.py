@@ -51,7 +51,9 @@ class LabelSorter:
             return platform
 
     def create_sorted_summary(self):
-        page_debrief = None; sorted_dict = {}
+        page_debrief = None; 
+        # summary dictionaries
+        sorted_dict = {}
         try:
             with pdfplumber.open(self.input_filepath) as pdf_file:
                 for page_index, page in enumerate(pdf_file.pages):
@@ -63,37 +65,24 @@ class LabelSorter:
                         "Amazon" : AmazonLabel(page_text=page_text, page_table=page_table,page_num=page_number).analyze_amzn_page(),
                     }
                     
-                    page_debrief = debriefs.get(self.platform,None)                   
-                    print('*'*8)
-                    """
-                    is_page_debrief_populated = page_debrief["order_id"] != None
-                    # sorting summary
-                    if self.platform and is_page_debrief_populated:
-                        # different conditions for mixed and single items
-                        # sorting key initialization
-                        numbers_list = None
+                    page_debrief = debriefs.get(self.platform,None)  
+                    if page_debrief.get("order_id",None):
+                        order_id = page_debrief.get("order_id",None)
+                        items_list = page_debrief.get("items",None)
                         
-                        sorting_key = page_debrief.get("sorting_key"); qty = page_debrief.get("qty")
-                        page_nums=[page_number - 1, page_number] if self.platform == "Amazon" else [page_number]
-                        print(page_debrief)
+                        for item_dict in items_list:
+                            if len(items_list) == 1:
+                                item_name = items_list[0]["item_name"]
+                                item_qty = items_list[0]["qty"]
+                                if not item_name in sorted_dict.keys():
+                                    sorted_dict[item_name] = {}
+                            elif len(items_list) >1:
+                                pass
                     
-                        # Adding sorting key if not present
-                        if sorting_key not in sorted_dict.keys(): 
-                            sorted_dict[sorting_key] = {}
-
-                        if sorting_key == self.misc_filename:
-                            numbers_list = sorted_dict[sorting_key]["pages"]
-                        else:
-                            if qty not in self.sorted_dict[sorting_key].keys():
-                                sorted_dict[sorting_key][qty] = []
-                            numbers_list = sorted_dict[sorting_key][qty]
-                        numbers_list += page_nums
-                    """  
-        except FileNotFoundError as fe:
-            print(fe)
         except Exception as e:
             print(e)
         else:
+            print(sorted_dict)
             return sorted_dict
             
     def create_single_pdf_file(self, pdf_name, page_numbers):

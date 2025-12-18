@@ -38,22 +38,7 @@ class AmazonLabel(BaseLabel):
                         
                         if page_dict["item_name"] != None:
                             self.page_debrief_dict["items"].append(page_dict)
-                print(self.page_debrief_dict)
-                """
-                # Deciding order type by reading the product table and types of items
-                if len(product_rows) > 2:
-                    print(product_rows)
-                    self.page_debrief_dict["sorting_key"] = "Mixed"
-                else:
-                    product_description = product_rows[-1][1] 
-                    product_name_match = re.sub(
-                        self.amazon_product_name_pattern,"",product_description, flags = re.IGNORECASE
-                    )
-                    self.page_debrief_dict["qty"] = product_rows[-1][3]
-                    self.page_debrief_dict["sorting_key"] = product_name_match.replace("\n"," ")
-                """
         except Exception as e:
             print(e)
-            
         else:
             return self.page_debrief_dict
