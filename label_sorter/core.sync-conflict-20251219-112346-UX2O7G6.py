@@ -7,7 +7,6 @@ from label_sorter.platforms.ecommerce.amazon import AmazonLabel
 
 logging.getLogger('pdfminer').setLevel(logging.ERROR)
 
-
 class LabelSorter:
     def __init__(self, pdf_path):
         self.input_filepath = pdf_path
@@ -73,8 +72,9 @@ class LabelSorter:
                         
                         for item_dict in items_list:
                             if len(items_list) == 1:
-                                item_name = items_list[0]["item_name"]
-                                item_qty = items_list[0]["qty"]
+                                item_dict = items_list[0]
+                                item_name = item_dict["item_name"]
+                                item_qty = item_dict["qty"]
                                 if not item_name in sorted_dict.keys():
                                     sorted_dict[item_name] = {}
                             elif len(items_list) >1:

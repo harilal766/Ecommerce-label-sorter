@@ -1,0 +1,5 @@
+# This directory is a Syncthing folder marker.
+# Do not delete.
+
+folderID: rtaxq-ybn5m
+created: 2025-12-19T11:13:03+05:30

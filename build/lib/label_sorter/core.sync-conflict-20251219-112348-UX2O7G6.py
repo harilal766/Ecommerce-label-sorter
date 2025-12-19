@@ -7,20 +7,17 @@ from label_sorter.platforms.ecommerce.amazon import AmazonLabel
 
 logging.getLogger('pdfminer').setLevel(logging.ERROR)
 
-
 class LabelSorter:
     def __init__(self, pdf_path):
-        self.input_filepath = pdf_path
-        self.output_folder = self.input_filepath.replace(".pdf","")
+        self.sorted_dict = {}
+        self.label_filepath = pdf_path
+        self.output_folder = self.label_filepath.replace(".pdf","")
         self.platform = self.find_platform()
-        self.misc_filename = "Mixed"
         
     def find_platform(self) -> str:
         platform = None
-        if os.path.exists(self.input_filepath) == False:
-            sys.exit("Input file does not exist....")
         try:
-            with pdfplumber.open(self.input_filepath) as pdf_file:
+            with pdfplumber.open(self.label_filepath) as pdf_file:
                 total_pages = 0; amazon_count = 0 
                 
                 shopify_order_id_count, amazon_order_id_count = 0, 0
@@ -45,52 +42,71 @@ class LabelSorter:
                     platform = "Amazon"
             
         except FileNotFoundError:
-            print(f"The file {self.input_filepath} does not exist.")
+            print(f"The file {self.label_filepath} does not exist.")
         except Exception as e:
             print(e)
         else:
             return platform
-
+        
     def create_sorted_summary(self):
-        page_debrief = None; 
-        # summary dictionaries
-        sorted_dict = {}
+        if not self.platform:
+            sys.exit("Unsupported Platform, exiting....")
+        page_debrief = None
         try:
-            with pdfplumber.open(self.input_filepath) as pdf_file:
+            print(f"Platform : {self.platform}")
+            with pdfplumber.open(self.label_filepath) as pdf_file:
                 for page_index, page in enumerate(pdf_file.pages):
                     page_text = page.extract_text(); page_table = page.extract_tables()
                     page_number = page_index+1
                     
+                    #Label_instance = BaseLabel(page_text=page_text, page_table=page_table,page_num=page_number)
                     debriefs = {
                         "Shopify" : ShopifyLabel(page_text=page_text, page_table=page_table,page_num=page_number).analyze_shpy_page(),
                         "Amazon" : AmazonLabel(page_text=page_text, page_table=page_table,page_num=page_number).analyze_amzn_page(),
                     }
                     
-                    page_debrief = debriefs.get(self.platform,None)  
-                    if page_debrief.get("order_id",None):
-                        order_id = page_debrief.get("order_id",None)
-                        items_list = page_debrief.get("items",None)
-                        
-                        for item_dict in items_list:
-                            if len(items_list) == 1:
-                                item_name = items_list[0]["item_name"]
-                                item_qty = items_list[0]["qty"]
-                                if not item_name in sorted_dict.keys():
-                                    sorted_dict[item_name] = {}
-                            elif len(items_list) >1:
-                                pass
+                    page_debrief = debriefs[self.platform]
                     
+                    print(f"{page_number} : {page_debrief}")
+                    
+                    is_page_debrief_populated = page_debrief["order_id"] != None
+                    # sorting summary
+                    if self.platform and is_page_debrief_populated:
+                        self.populate_shipment_summary(
+                            sorting_key=page_debrief["sorting_key"], qty=page_debrief["qty"],
+                            page_nums=[page_number - 1, page_number] if self.platform == "Amazon" else [page_number]
+                        )
+                    
+        except FileNotFoundError as fe:
+            print(fe)
         except Exception as e:
             print(e)
         else:
-            print(sorted_dict)
-            return sorted_dict
+            return self.sorted_dict
+        
+    def populate_shipment_summary(self, sorting_key:str, page_nums:list, qty : str) -> None:
+        try:
+            # different conditions for mixed and single items
+            # sorting key initialization
+            numbers_list = None
+            # Adding sorting key if not present
+            if sorting_key not in self.sorted_dict.keys(): 
+                self.sorted_dict[sorting_key] = [] if sorting_key == "Mixed" else {}
+
+            if sorting_key == "Mixed":
+                numbers_list = self.sorted_dict[sorting_key]
+            else:
+                if qty not in self.sorted_dict[sorting_key].keys():
+                    self.sorted_dict[sorting_key][qty] = []
+                numbers_list = self.sorted_dict[sorting_key][qty]
+            numbers_list += page_nums
+            
+        except Exception as e:
+            print(e)
             
     def create_single_pdf_file(self, pdf_name, page_numbers):
-        if page_numbers == None:
-            sys.exit("Received Nonetype instead of page numbers")
         try:
-            reader = PdfReader(self.input_filepath); writer = PdfWriter()
+            reader = PdfReader(self.label_filepath); writer = PdfWriter()
             print(pdf_name, page_numbers)
             # adding pages to the writer
             for page in page_numbers:
@@ -133,20 +149,14 @@ class LabelSorter:
             print(f"Sorted Summary :")
             for sorting_key, value in summary_dict.items():
                 # Assigning output file name and its pages according to order type
-                # single item orders
-                if type(value) == dict:
-                    if type(sorting_key) != self.misc_filename:
-                        #print(f"Writing Single item order",end=", ")
-                        for qty,page_list in value.items():
-                            #print(f"Detected more than one qty.")
-                            self.create_single_pdf_file(pdf_name=f"{sorting_key} - {qty}", page_numbers=page_list)
-                    else:
-                        self.create_single_pdf_file(
-                            pdf_name = self.misc_filename, page_numbers= value.get("pages",None)
-                        )
-                # Mixed orders which returns page numbers list
-                elif type(value) == list:
+                # Mixed orders
+                if type(value) == list:
                     self.create_single_pdf_file(pdf_name=sorting_key, page_numbers=value)
-                
+                # single item orders
+                elif type(value) == dict:
+                    #print(f"Writing Single item order",end=", ")
+                    for qty,page_list in value.items():
+                        #print(f"Detected more than one qty.")
+                        self.create_single_pdf_file(pdf_name=f"{sorting_key} - {qty}", page_numbers=page_list)
         except Exception as e:
             print(f"Err : {e}")

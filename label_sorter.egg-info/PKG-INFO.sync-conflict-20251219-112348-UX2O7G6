@@ -1,0 +1,113 @@
+Metadata-Version: 2.4
+Name: label_sorter
+Version: 0.3
+Summary: Library to sort Amazon and Shopify shipping labels
+Home-page: https://github.com/harilal766/Ecommerce-label-sorter
+Author: Harry19967
+Author-email: harilalsunil2@gmail.com
+License: MIT
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: asarPy==1.0.1
+Requires-Dist: blinker==1.9.0
+Requires-Dist: build==1.2.2.post1
+Requires-Dist: certifi==2025.7.14
+Requires-Dist: cffi==1.17.1
+Requires-Dist: charset-normalizer==3.4.2
+Requires-Dist: click==8.2.1
+Requires-Dist: cryptography==45.0.5
+Requires-Dist: docutils==0.21.2
+Requires-Dist: et_xmlfile==2.0.0
+Requires-Dist: greenlet==3.2.3
+Requires-Dist: id==1.5.0
+Requires-Dist: idna==3.10
+Requires-Dist: iniconfig==2.1.0
+Requires-Dist: itsdangerous==2.2.0
+Requires-Dist: jaraco.classes==3.4.0
+Requires-Dist: jaraco.context==6.0.1
+Requires-Dist: jaraco.functools==4.2.1
+Requires-Dist: jeepney==0.9.0
+Requires-Dist: keyring==25.6.0
+Requires-Dist: markdown-it-py==3.0.0
+Requires-Dist: MarkupSafe==3.0.2
+Requires-Dist: mdurl==0.1.2
+Requires-Dist: more-itertools==10.7.0
+Requires-Dist: nh3==0.3.0
+Requires-Dist: packaging==25.0
+Requires-Dist: pdfminer.six==20250506
+Requires-Dist: pdfplumber==0.11.7
+Requires-Dist: pillow==11.3.0
+Requires-Dist: pluggy==1.6.0
+Requires-Dist: pycparser==2.22
+Requires-Dist: Pygments==2.19.2
+Requires-Dist: pypdf==5.8.0
+Requires-Dist: PyPDF2==3.0.1
+Requires-Dist: pypdfium2==4.30.1
+Requires-Dist: pyproject_hooks==1.2.0
+Requires-Dist: pytest==8.4.1
+Requires-Dist: python-dateutil==2.9.0.post0
+Requires-Dist: pytz==2025.2
+Requires-Dist: readme_renderer==44.0
+Requires-Dist: requests==2.32.4
+Requires-Dist: requests-toolbelt==1.0.0
+Requires-Dist: rfc3986==2.0.0
+Requires-Dist: rich==14.1.0
+Requires-Dist: SecretStorage==3.3.3
+Requires-Dist: setuptools==80.9.0
+Requires-Dist: six==1.17.0
+Requires-Dist: termcolor==3.1.0
+Requires-Dist: twine==6.1.0
+Requires-Dist: typing_extensions==4.14.1
+Requires-Dist: tzdata==2025.2
+Requires-Dist: urllib3==2.5.0
+Requires-Dist: Werkzeug==3.1.3
+Requires-Dist: wheel==0.45.1
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: license
+Dynamic: license-file
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# Ecom-label-sorter
+
+## Description:
+1. A python program to sort Amazon and Shopify pdf shipping labels.
+2. Each sorted group of orders will be stored in a dedicated pdf file which is named after the product name and quantity.
+3.  On Miscellaneous orders these pdf file will be named "Mixed".
+4. All of these files will be stored inside a folder which is named after the input pdf file.
+
+## Reason to develop this project
+Manually sorting a large PDF containing multiple orders is time-consuming and prone to human error.
+
+# Installation
+```
+pip install label_sorter
+```
+
+# Usage
+```
+from label_sorter import Label_sorter
+
+sorter_instance = Label(pdf_path = <path to the pdf file>)
+
+# Creating sorted pdf files
+# this will create a folder named after the pdf file and will be containig sorted pdf files and summary json fle.
+sorter_instance.created_sorted_pdf_files()
+
+```
+
+
+
+
+# Classes and their descriptions
+
+[ Label Sorter](docs/Label_Sorter.md)
