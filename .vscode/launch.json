@@ -9,7 +9,7 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
-            "python" : "${workspaceFolder}/env/Scripts/python.exe"
+            "python" : "${workspaceFolder}/env/bin/python"
         }
     ]
 }
