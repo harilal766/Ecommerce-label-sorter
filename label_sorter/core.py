@@ -73,13 +73,13 @@ class LabelSorter:
                         
                         for item_dict in items_list:
                             if len(items_list) == 1:
-                                item_name = items_list[0]["item_name"]
-                                item_qty = items_list[0]["qty"]
-                                if not item_name in sorted_dict.keys():
-                                    sorted_dict[item_name] = {}
+                                item_dict = items_list[0]
                             elif len(items_list) >1:
-                                pass
-                    
+                                item_dict = item_dict
+                            print(item_dict)
+                            item_name = items_list[0]["item_name"]
+                            item_qty = items_list[0]["qty"]
+                        print("*"*5)
         except Exception as e:
             print(e)
         else:
