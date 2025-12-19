@@ -81,10 +81,10 @@ class LabelSorter:
                                     summary_dict[self.misc_filename] = {
                                         "pages" : [], "summary" : {}
                                     }
-                                mixed_order_pages = summary_dict[self.misc_filename]["pages"]
-                                if not pages in  mixed_order_pages:
-                                    chosen_summary_dict = summary_dict[self.misc_filename]["summary"]
-                                
+                                chosen_summary_dict = summary_dict[self.misc_filename]["summary"]
+                                for mixed_page in pages:
+                                    if not mixed_page in summary_dict[self.misc_filename]["pages"]: 
+                                        summary_dict[self.misc_filename]["pages"].append(mixed_page)
                             # getting a clean item name
                             item_name = re.sub(
                                 r"\n|\||Shipping Charges|\/","",
@@ -93,7 +93,6 @@ class LabelSorter:
                             item_qty = item_dict["qty"]
                             if not item_name in chosen_summary_dict.keys():
                                 chosen_summary_dict[item_name] = {}
-                            
                             
                             if not item_qty in chosen_summary_dict[item_name].keys():
                                 chosen_summary_dict[item_name][item_qty] = [] if item_count == 1 else 0
