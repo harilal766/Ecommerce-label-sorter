@@ -55,12 +55,13 @@ class LabelSorter:
         page_debrief = None; 
         # summary dictionaries
         summary_dict = {}; chosen_summary_dict = {}
+        pages_list = None
         try:
             with pdfplumber.open(self.input_filepath) as pdf_file:
                 for page_index, page in enumerate(pdf_file.pages):
                     page_text = page.extract_text(); page_table = page.extract_tables()
                     page_number = page_index+1
-                    
+                    pages = [page_number-1, page_number] if self.platform == "Amazon" else [page_number]
                     debriefs = {
                         "Shopify" : ShopifyLabel(page_text=page_text, page_table=page_table,page_num=page_number).analyze_shpy_page(),
                         "Amazon" : AmazonLabel(page_text=page_text, page_table=page_table,page_num=page_number).analyze_amzn_page(),
@@ -71,33 +72,36 @@ class LabelSorter:
                         order_id = page_debrief.get("order_id",None)
                         items_list = page_debrief.get("items",None)
                         for item_dict in items_list:
-                            if len(items_list) == 1:
+                            item_count = len(items_list)
+                            
+                            if item_count == 1:
                                 chosen_summary_dict = summary_dict
-                            elif len(items_list) >1:
+                            elif item_count >1:
                                 if not self.misc_filename in summary_dict.keys():
                                     summary_dict[self.misc_filename] = {
                                         "pages" : [], "summary" : {}
                                     }
-                                chosen_summary_dict = summary_dict[self.misc_filename]["summary"]
+                                mixed_order_pages = summary_dict[self.misc_filename]["pages"]
+                                if not pages in  mixed_order_pages:
+                                    chosen_summary_dict = summary_dict[self.misc_filename]["summary"]
                                 
                             # getting a clean item name
                             item_name = re.sub(
-                                r"\n|\||Shipping Charges|\/|\s{2}","",
+                                r"\n|\||Shipping Charges|\/","",
                                 item_dict["item_name"]
                             )
                             item_qty = item_dict["qty"]
                             if not item_name in chosen_summary_dict.keys():
                                 chosen_summary_dict[item_name] = {}
                             
+                            
                             if not item_qty in chosen_summary_dict[item_name].keys():
-                                chosen_summary_dict[item_name][item_qty] = []
+                                chosen_summary_dict[item_name][item_qty] = [] if item_count == 1 else 0
                                 
-                            page_number = int(page_number)
-                            chosen_summary_dict[item_name][item_qty] += [page_number-1, page_number] if self.platform == "Amazon" else [page_number]
+                            chosen_summary_dict[item_name][item_qty] += pages if item_count == 1 else 1
         except Exception as e:
             print(e)
         else:
-            print(summary_dict)
             return summary_dict
             
     def create_single_pdf_file(self, pdf_name, page_numbers):
