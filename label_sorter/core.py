@@ -151,19 +151,14 @@ class LabelSorter:
             for sorting_key, value in summary_dict.items():
                 # Assigning output file name and its pages according to order type
                 # single item orders
-                if type(value) == dict:
-                    if type(sorting_key) != self.misc_filename:
-                        #print(f"Writing Single item order",end=", ")
-                        for qty,page_list in value.items():
-                            #print(f"Detected more than one qty.")
-                            self.create_single_pdf_file(pdf_name=f"{sorting_key} - {qty}", page_numbers=page_list)
-                    else:
-                        self.create_single_pdf_file(
-                            pdf_name = self.misc_filename, page_numbers= value.get("pages",None)
-                        )
-                # Mixed orders which returns page numbers list
-                elif type(value) == list:
-                    self.create_single_pdf_file(pdf_name=sorting_key, page_numbers=value)
-                
+                if sorting_key != self.misc_filename:
+                    #print(f"Writing Single item order",end=", ")
+                    for qty,page_list in value.items():
+                        #print(f"Detected more than one qty.")
+                        self.create_single_pdf_file(pdf_name=f"{sorting_key} - {qty}", page_numbers=page_list)
+                else:
+                    self.create_single_pdf_file(
+                        pdf_name = self.misc_filename, page_numbers= value.get("pages",None)
+                    )
         except Exception as e:
             print(f"Err : {e}")
