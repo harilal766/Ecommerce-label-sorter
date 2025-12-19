@@ -80,7 +80,11 @@ class LabelSorter:
                                     }
                                 chosen_summary_dict = summary_dict[self.misc_filename]["summary"]
                                 
-                            item_name = item_dict["item_name"]
+                            # getting a clean item name
+                            item_name = re.sub(
+                                r"\n|\||Shipping Charges|\/|\s{2}","",
+                                item_dict["item_name"]
+                            )
                             item_qty = item_dict["qty"]
                             if not item_name in chosen_summary_dict.keys():
                                 chosen_summary_dict[item_name] = {}

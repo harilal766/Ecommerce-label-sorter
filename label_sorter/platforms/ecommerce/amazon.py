@@ -5,7 +5,8 @@ class AmazonLabel(BaseLabel):
     def __init__(self, page_text, page_table,page_num):
         super().__init__(page_text, page_table,page_num)
         self.amazon_order_id_pattern = r'\d{3}-\d{7}-\d{7}'
-        self.amazon_product_name_pattern = r'\|\s[A-Z\d]+\s\(\s[A-Z\d-]+\s\)(\s|\n)Shipping Charges'
+        #self.amazon_product_name_pattern = r'\|\s[A-Z\d]+\s\(\s[A-Z\d-]+\s\)(\s|\n)Shipping Charges'
+        self.amazon_product_name_pattern = r'\|\s[A-Z\d]+\s\(\s[A-Z\d-]+\s\)(\s|\n)'
     
     def find_amazon_page_type(self):
         type = None
@@ -23,6 +24,7 @@ class AmazonLabel(BaseLabel):
             return type
     
     def analyze_amzn_page(self) -> dict:
+        page_dict = {}
         try:
             # start of amazon function in the future
             # Ensuring invoice pages
@@ -33,8 +35,8 @@ class AmazonLabel(BaseLabel):
                 product_table = self.page_table[0]
                 product_rows = product_table[1:-3]
                 for row in product_rows:
-                        prod_name = row[1].replace("\n",""); qty = row[3]
-                        page_dict = {"item_name" : prod_name, "qty" : qty}
+                        prod_name = row[1]; prod_qty = row[3]
+                        page_dict = {"item_name" : prod_name, "qty" : prod_qty}
                         
                         if page_dict["item_name"] != None:
                             self.page_debrief_dict["items"].append(page_dict)
